@@ -1,0 +1,201 @@
+==============================================================================
+ROTEIRO DE APRESENTAÇÃO
+Grafos Biconexos no Jiu-Jitsu — Técnicas de Programação Avançada · IFES
+==============================================================================
+
+Participantes : Nadson da Cruz Silva · José Carlos Ceccon
+Professor     : Rafael Vargas
+
+------------------------------------------------------------------------------
+DIVISÃO
+------------------------------------------------------------------------------
+PARTE 1 — Nadson da Cruz Silva .......... slides 01 a 06
+PARTE 2 — José Carlos Ceccon ........... slides 07 a 11
+
+==============================================================================
+PARTE 1 — NADSON DA CRUZ SILVA
+==============================================================================
+
+------------------------------------------------------------------------------
+SLIDE 01 — CAPA  (Nadson)
+------------------------------------------------------------------------------
+Olá a todos. Somos Nadson da Cruz Silva e José Carlos Ceccon, e o professor
+responsável é Rafael Vargas.
+
+Nosso trabalho se chama "Grafos Biconexos no Jiu-Jitsu". Vamos mostrar como
+um conceito de Teoria dos Grafos — os pontos de articulação — resolve um
+problema concreto: identificar membros que, se saírem de uma rede de treino,
+desconectam o grupo.
+
+O problema será resolvido com o algoritmo de Tarjan, baseado em DFS com
+low-link, que roda em tempo linear O(V + E). Eu começo apresentando o conceito
+e o algoritmo; depois o José Carlos mostra o diagnóstico e a solução.
+
+------------------------------------------------------------------------------
+SLIDE 02 — O QUE É UM GRAFO BICONEXO?  (Nadson)
+------------------------------------------------------------------------------
+Um grafo conexo é biconexo — ou 2-conexo — quando continua conexo mesmo depois
+de removermos QUALQUER vértice. Em outras palavras, ele não tem pontos de
+articulação.
+
+Daí decorrem duas propriedades importantes: todo par de vértices possui ao
+menos dois caminhos distintos entre si, e a rede é resiliente, porque nenhum
+único vértice é ponto crítico.
+
+À direita, a base do vocabulário: os vértices V são os nós — aqui, os membros
+do clube; as arestas E são as conexões — os treinos em comum. E a articulação é
+justamente o vértice cuja remoção aumenta o número de componentes conexas. É o
+alvo da nossa análise.
+
+------------------------------------------------------------------------------
+SLIDE 03 — TARJAN: DFS + LOW-LINK  (Nadson)
+------------------------------------------------------------------------------
+Como descobrimos as articulações? Com uma única busca em profundidade, a DFS,
+que anota dois valores para cada vértice.
+
+O primeiro é desc[v]: a ordem em que o vértice v foi descoberto. O segundo é
+low[v]: o menor desc alcançável a partir da subárvore de v.
+
+A regra central: um vértice u — que não seja a raiz — é ponto de articulação
+quando existe um filho v tal que low[v] é maior ou igual a desc[u]. Isso
+significa que a subárvore de v não consegue alcançar nenhum ancestral de u por
+nenhuma outra aresta.
+
+Um caso especial: a raiz da DFS é articulação se tiver mais de um filho. E as
+arestas de retorno são o que atualiza o low-link. O custo total é O(V + E) —
+linear, portanto eficiente.
+
+------------------------------------------------------------------------------
+SLIDE 04 — OS TRECHOS DE CÓDIGO QUE IMPORTAM  (Nadson)
+------------------------------------------------------------------------------
+Aqui está o núcleo em código.
+
+No primeiro bloco, na entrada de cada nó, marcamos descoberta[u] e low[u] com o
+tempo atual. Para cada vizinho v, se ele ainda não foi visitado, descemos na DFS
+e atualizamos low[u] com o mínimo entre low[u] e low[v].
+
+O trecho destacado em verde é a condição de articulação: se u não é a raiz e
+low[v] é maior ou igual a descoberta[u], então u entra no conjunto de
+articulações.
+
+No segundo bloco, o elif trata a aresta de retorno, atualizando o low com a
+descoberta do vértice visitado. E, ao final, o caso da raiz: se ela não tem pai
+e teve mais de um filho, também é articulação.
+
+À direita, os métodos de verificação — eh_biconexo e simular_remocao — que usam
+esse resultado e a contagem de componentes para confirmar o diagnóstico.
+
+------------------------------------------------------------------------------
+SLIDE 05 — A DFS EM AÇÃO  (Nadson — demonstração ao vivo)
+------------------------------------------------------------------------------
+Agora quero mostrar o algoritmo rodando passo a passo.
+
+(Clique em "Próximo" algumas vezes e explique conforme avança.)
+
+Começamos na raiz J01. Visitamos J02, depois J03. Quando encontramos a aresta de
+retorno J03→J01, o low de J03 cai para zero.
+
+Seguimos para J04 e J05, e a aresta de retorno J05→J03 baixa o low de J05.
+
+No retorno J04→J03 aparece a confirmação: low[J04] é igual a desc[J03], então
+J03 é ARTICULAÇÃO.
+
+Podem acompanhar na tabela os valores de descoberta e low de cada vértice, e no
+badge sobre cada nó. Se quiserem, uso o botão "Auto" para rodar sozinho.
+
+------------------------------------------------------------------------------
+SLIDE 06 — O CLUBE DE JIU-JITSU  (Nadson)
+------------------------------------------------------------------------------
+Para tornar o problema concreto, traduzimos tudo para uma rede real de treino.
+
+Os vértices são alunos e professores, de J01 a J05. As arestas ligam dois
+membros que treinaram juntos pelo menos 3 sessões no mês. E o objetivo é
+descobrir se algum membro é ponto único de conexão da rede.
+
+Observem o grafo à direita: a rede forma dois triângulos — {J01, J02, J03} e
+{J03, J04, J05} — ligados por um único vértice. Guardem essa imagem, porque o
+José Carlos vai mostrar o que isso significa.
+
+(Passa a palavra ao José Carlos.)
+
+==============================================================================
+PARTE 2 — JOSÉ CARLOS CECCON
+==============================================================================
+
+------------------------------------------------------------------------------
+SLIDE 07 — J03 É O PONTO DE DEPENDÊNCIA  (José Carlos)
+------------------------------------------------------------------------------
+Obrigado, Nadson. Continuando a partir do grafo que ele apresentou.
+
+A DFS identifica J03 como a única articulação da rede original. Percebam por
+quê: J03 pertence ao triângulo {J01, J02, J03} e também ao triângulo
+{J03, J04, J05}. Ou seja, é a única ponte entre os dois grupos.
+
+Se J03 parar, os grupos perdem contato — é um verdadeiro gargalo humano.
+
+No código abaixo, a saída do algoritmo confirma: articulações = ['J03'] e
+biconexo = False.
+
+------------------------------------------------------------------------------
+SLIDE 08 — REMOVENDO J03  (José Carlos — demonstração ao vivo)
+------------------------------------------------------------------------------
+Vamos simular a saída de J03.
+
+(Clique em "Remover J03".)
+
+Como previsto, o clube se parte em duas componentes isoladas: {J01, J02} e
+{J04, J05}. Nenhum membro de um grupo consegue mais treinar ou se comunicar com
+o outro.
+
+Reparem no grafo: as arestas que ligavam a J03 ficam esmaecidas e o nó aparece
+como removido. É a prova visual de que J03 era mesmo o ponto crítico.
+
+(Pode clicar em "Restaurar" para voltar ao estado original.)
+
+------------------------------------------------------------------------------
+SLIDE 09 — REDE BICONEXA: ADICIONAR J02–J04  (José Carlos)
+------------------------------------------------------------------------------
+A solução é mínima: uma única aresta nova entre J02 e J04.
+
+Essa aresta cria um caminho alternativo entre os dois grupos, eliminando a
+dependência de J03. Com isso, o grafo passa a ser biconexo — nenhum membro é
+crítico — e a rede suporta treinos conjuntos e integração entre os grupos.
+
+No código: adicionamos a aresta J02–J04, o grafo passa a ter 7 arestas,
+articulações ficam vazias e biconexo = True. A aresta nova aparece destacada no
+grafo à esquerda.
+
+------------------------------------------------------------------------------
+SLIDE 10 — COMPARAÇÃO DAS REDES  (José Carlos)
+------------------------------------------------------------------------------
+Fazendo o antes e depois lado a lado:
+
+À esquerda, o grafo original é vulnerável — 5 vértices e 6 arestas, J03 é
+articulação única, e remover J03 gera 2 componentes. Não é biconexo.
+
+À direita, o grafo biconexo é resiliente — 5 vértices e 7 arestas, só uma a
+mais. Não há ponto de articulação, e remover qualquer vértice deixa o grafo com
+1 componente. É biconexo.
+
+A diferença entre vulnerável e resiliente é literalmente uma aresta.
+
+------------------------------------------------------------------------------
+SLIDE 11 — CONCLUSÃO  (José Carlos — fechamento; agradecimento em nome dos dois)
+------------------------------------------------------------------------------
+Para concluir, três pontos:
+
+Primeiro, o algoritmo é eficiente: uma DFS com low-link encontra articulações em
+O(V + E).
+
+Segundo, o diagnóstico é claro: J03 foi identificado como o ponto único de
+dependência da rede.
+
+Terceiro, a solução é mínima: uma aresta, J02–J04, elimina a vulnerabilidade.
+
+E o mais importante: esse mesmo raciocínio se aplica a redes de e-mail, a
+infraestrutura, a cadeias de suprimentos — qualquer rede que precise de
+resiliência.
+
+Somos Nadson da Cruz Silva e José Carlos Ceccon. Muito obrigado pela atenção.
+
+==============================================================================

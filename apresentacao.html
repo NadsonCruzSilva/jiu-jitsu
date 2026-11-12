@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Grafos Biconexos no Jiu-Jitsu — IFES</title>
+
+<!-- ============================================================
+     FONTES — Newsreader (display) + Hanken Grotesk (corpo/labels) + DM Mono (chrome)
+     ============================================================ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..500;1,6..72,400..500&family=Hanken+Grotesk:wght@400..700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- GSAP para micro-animações e controlo da DFS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  /* ============================================================
+     TEMA — Cobalt Grid (dois tons: paper + ink)
+     ============================================================ */
+  :root {
+    --paper: #F0EBDE;
+    --paper-2: #E6E0CE;
+    --ink: #1F2BE0;
+    --ink-soft: #5560E5;
+    --grid: rgba(31, 43, 224, 0.10);
+    --ink-faint: rgba(31, 43, 224, 0.18);
+
+    --font-display: 'Newsreader', Georgia, serif;
+    --font-body: 'Hanken Grotesk', sans-serif;
+    --font-mono: 'DM Mono', ui-monospace, monospace;
+
+    --edge: 80px;
+
+    --font-scale: 1;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ============================================================
+     VIEWPORT-BASE (fixed 16:9 stage) — obrigatório
+     ============================================================ */
+  html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #111; font-size: calc(1rem * var(--font-scale)); }
+  .deck-viewport { position: fixed; inset: 0; overflow: hidden; background: #111; }
+  .deck-stage {
+    position: absolute; left: 0; top: 0;
+    width: 1920px; height: 1080px;
+    overflow: hidden; transform-origin: 0 0;
+    background: var(--paper);
+  }
+  .slide {
+    position: absolute; inset: 0;
+    width: 1920px; height: 1080px;
+    overflow: hidden; display: block;
+    visibility: hidden; opacity: 0; pointer-events: none;
+    background: var(--paper); color: var(--ink);
+  }
+  .slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+  .slide { transition: opacity 280ms ease; }
+  img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+  .deck-controls { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 1000; }
+  @media print {
+    html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+    .deck-viewport { position: static; overflow: visible; background: #fff; }
+    .deck-stage { position: static; width: auto; height: auto; transform: none !important; background: none; }
+    .slide { position: relative; display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+    .slide:last-child { break-after: auto; page-break-after: auto; }
+    .deck-controls, .hud, .edit-hotzone, .edit-toggle { display: none !important; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+  }
+
+  /* ============================================================
+     GRADE DE PAPEL — permanente em todo slide (::before)
+     ============================================================ */
+  .slide::before {
+    content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+      linear-gradient(to right, var(--grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* ============================================================
+     MOLDURA FIXA — hairlines topo/base + pagenum/nav
+     ============================================================ */
+  .hairlines::before, .hairlines::after {
+    content: ""; position: absolute; left: var(--edge); right: var(--edge);
+    height: 1.5px; background: var(--ink); z-index: 4;
+  }
+  .hairlines::before { top: 28px; }
+  .hairlines::after { bottom: 24px; }
+
+  .pagenum {
+    position: absolute; right: var(--edge); bottom: 44px; z-index: 6;
+    font-family: var(--font-mono); font-size: calc(13px * var(--font-scale)); letter-spacing: 0.06em;
+    color: var(--ink); opacity: 0.85;
+  }
+
+  /* ============================================================
+     TIPOGRAFIA / COMPONENTES PARTILHADOS
+     ============================================================ */
+  .frame {
+    position: absolute; inset: 96px var(--edge) 92px; z-index: 2;
+    display: flex; flex-direction: column;
+  }
+  .frame.center { align-items: center; justify-content: center; text-align: center; }
+
+  .kicker {
+    font-family: var(--font-body); font-weight: 600;
+    font-size: calc(13px * var(--font-scale)); letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink); display: flex; align-items: center; gap: 14px;
+  }
+  .kicker::before { content: ""; width: 34px; height: 1.5px; background: var(--ink); display: inline-block; }
+
+  h2 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: calc(86px * var(--font-scale)); line-height: 0.97; letter-spacing: -0.005em;
+    color: var(--ink); text-wrap: balance;
+  }
+  h2 em { font-style: italic; }
+  h3 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: calc(40px * var(--font-scale)); line-height: 1.08; color: var(--ink);
+  }
+
+  p, li {
+    font-family: var(--font-body); font-weight: 400;
+    font-size: calc(21px * var(--font-scale)); line-height: 1.5; color: var(--ink);
+  }
+  strong { font-weight: 700; }
+  .mono { font-family: var(--font-mono); font-size: 0.9em; letter-spacing: 0.04em; }
+
+  /* Topbar (headline + lab-tag, rule cobalt 1.5px) */
+  .topbar {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 30px; border-bottom: 1.5px solid var(--ink); padding-bottom: 18px;
+    margin-bottom: 34px;
+  }
+  .topbar .lab {
+    font-family: var(--font-mono); font-size: calc(13px * var(--font-scale)); letter-spacing: 0.06em;
+    color: var(--ink); white-space: nowrap; opacity: 0.85;
+  }
+  .topbar .lab .speaker {
+    display: block; margin-top: 6px; font-family: var(--font-body); font-weight: 700;
+    font-size: calc(12px * var(--font-scale)); letter-spacing: 0.02em; text-transform: uppercase;
+    color: var(--ifes-red);
+  }
+
+  /* Listas */
+  ul.fancy { list-style: none; display: flex; flex-direction: column; gap: 16px; }
+  ul.fancy li {
+    position: relative; padding-left: 30px; font-size: calc(21px * var(--font-scale)); line-height: 1.45;
+    border-bottom: 1px solid var(--ink-faint); padding-bottom: 12px;
+  }
+  ul.fancy li:last-child { border-bottom: none; }
+  ul.fancy li::before {
+    content: "—"; position: absolute; left: 0; color: var(--ink); font-family: var(--font-mono);
+    font-size: calc(15px * var(--font-scale)); top: 3px;
+  }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  .cols.wide-left { grid-template-columns: 1.15fr 1fr; }
+  .cols.wide-right { grid-template-columns: 1fr 1.15fr; }
+  .col { min-width: 0; }
+
+  /* Cards → planos: borda cobalt, sem sombra, sem radius */
+  .cards { display: grid; gap: 16px; }
+  .cards.c3 { grid-template-columns: repeat(3, 1fr); }
+  .cards.c2 { grid-template-columns: repeat(2, 1fr); }
+  .card {
+    border: 1.5px solid var(--ink); padding: 24px 26px; background: var(--paper);
+    position: relative;
+  }
+  .card .num {
+    font-family: var(--font-display); font-size: calc(44px * var(--font-scale)); line-height: 0.9;
+    color: var(--ink); margin-bottom: 10px;
+  }
+  .card h4 {
+    font-family: var(--font-body); font-weight: 700; font-size: calc(18px * var(--font-scale));
+    text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink); margin-bottom: 8px;
+  }
+  .card p { font-size: calc(16px * var(--font-scale)); line-height: 1.45; color: var(--ink); opacity: 0.85; }
+
+  /* Código */
+  .code {
+    border: 1.5px solid var(--ink); border-left-width: 5px;
+    padding: 22px 26px; background: var(--paper-2);
+    font-family: var(--font-mono); font-size: calc(18px * var(--font-scale)); line-height: 1.62;
+    color: var(--ink); white-space: pre; tab-size: 4; overflow: hidden;
+  }
+  .code .c-key { color: var(--ink); font-weight: 500; }
+  .code .c-fn  { color: var(--ink); text-decoration: none; }
+  .code .c-str { color: var(--ink); }
+  .code .c-com { color: var(--ink); opacity: 0.5; font-style: italic; }
+  .code .c-num { color: var(--ink); opacity: 0.85; }
+  .code .c-hl { background: rgba(31,43,224,0.14); box-shadow: inset 0 0 0 1px var(--ink); padding: 0 4px; }
+  .code-title {
+    font-family: var(--font-body); font-weight: 600; font-size: calc(12px * var(--font-scale));
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink);
+    margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--ink-faint);
+  }
+
+  /* ============================================================
+     GRAFO SVG — traço cobalt, fill paper
+     ============================================================ */
+  .graph-box { width: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
+  svg.graph { width: 100%; height: auto; max-height: 560px; overflow: visible; }
+  .g-edge { stroke: var(--ink-faint); stroke-width: 5; stroke-linecap: round; transition: stroke 0.35s, stroke-width 0.35s, opacity 0.35s; }
+  .g-edge.tree { stroke: var(--ink); stroke-width: 7; }
+  .g-edge.ret  { stroke: var(--ink); stroke-width: 7; stroke-dasharray: 14 10; }
+  .g-edge.new  { stroke: var(--ink); stroke-width: 10; }
+  .g-edge.dim  { stroke: var(--grid); opacity: 0.6; }
+  .g-node circle { fill: var(--paper); stroke: var(--ink); stroke-width: 3.5; transition: fill 0.35s, stroke 0.35s; }
+  .g-node text {
+    fill: var(--ink); font-family: var(--font-mono); font-weight: 500;
+    font-size: calc(32px * var(--font-scale)); text-anchor: middle; dominant-baseline: central; pointer-events: none;
+  }
+  .g-node .badge { fill: var(--paper); stroke: var(--ink); stroke-width: 1.5; }
+  .g-node .badge-txt { font-size: calc(19px * var(--font-scale)); font-weight: 500; fill: var(--ink); font-family: var(--font-mono); }
+  .g-node.visited circle { fill: rgba(31,43,224,0.10); stroke: var(--ink); }
+  .g-node.active circle { fill: rgba(31,43,224,0.28); stroke: var(--ink); stroke-width: 5; }
+  .g-node.articulation circle { fill: var(--ink); stroke: var(--ink); stroke-width: 5; }
+  .g-node.articulation text { fill: var(--paper); }
+  .g-node.removed { opacity: 0.28; }
+  .g-node.removed circle { stroke: var(--ink); stroke-dasharray: 8 8; }
+  .g-node.removed text { fill: var(--ink); }
+
+  /* ============================================================
+     PAINEL DE ANIMAÇÃO DFS
+     ============================================================ */
+  .anim-layout { display: grid; grid-template-columns: 1.12fr 1fr; gap: 40px; align-items: stretch; flex: 1; min-height: 0; }
+  .anim-stage { border: 1.5px solid var(--ink); padding: 10px; display: flex; align-items: center; background: var(--paper); }
+  .anim-side { display: flex; flex-direction: column; gap: 14px; justify-content: center; min-width: 0; }
+  .step-card { border: 1.5px solid var(--ink); padding: 22px 26px; min-height: 220px; display: flex; flex-direction: column; }
+  .step-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--ink-faint); }
+  .step-count { font-family: var(--font-mono); font-size: calc(15px * var(--font-scale)); color: var(--ink); letter-spacing: 0.04em; }
+  .step-acao { font-family: var(--font-display); font-size: calc(30px * var(--font-scale)); color: var(--ink); line-height: 1; }
+  .step-body { font-family: var(--font-body); font-size: calc(18px * var(--font-scale)); line-height: 1.45; color: var(--ink); }
+  .step-note { margin-top: auto; padding-top: 12px; font-family: var(--font-mono); font-size: calc(14px * var(--font-scale)); line-height: 1.4; color: var(--ink); border-top: 1px dashed var(--ink-faint); }
+
+  .val-table { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .val-cell { border: 1px solid var(--ink-faint); padding: 10px 4px; text-align: center; }
+  .val-cell .vn { font-family: var(--font-mono); font-weight: 500; font-size: calc(16px * var(--font-scale)); color: var(--ink); }
+  .val-cell .vd { font-family: var(--font-mono); font-size: calc(13px * var(--font-scale)); color: var(--ink); opacity: 0.7; margin-top: 2px; }
+  .val-cell.has .vd { opacity: 1; }
+  .val-cell.art { border-color: var(--ink); background: rgba(31,43,224,0.12); }
+
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn {
+    font-family: var(--font-body); font-weight: 600; font-size: calc(15px * var(--font-scale));
+    letter-spacing: 0.02em; color: var(--ink); background: var(--paper);
+    border: 1.5px solid var(--ink); padding: 10px 18px; cursor: pointer; transition: background 0.15s, color 0.15s; user-select: none;
+  }
+  .btn:hover:not(:disabled) { background: var(--ink); color: var(--paper); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn.primary { background: var(--ink); color: var(--paper); }
+  .btn.primary:hover:not(:disabled) { background: var(--ink-soft); }
+
+  /* ============================================================
+     COMPARAÇÃO
+     ============================================================ */
+  .cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .cmp-card { border: 1.5px solid var(--ink); padding: 36px 40px; position: relative; }
+  .cmp-card.bad { border-width: 3px; }
+  .cmp-tag {
+    display: inline-block; font-family: var(--font-mono); font-size: calc(13px * var(--font-scale));
+    text-transform: uppercase; letter-spacing: 0.1em; padding: 5px 12px;
+    border: 1.5px solid var(--ink); margin-bottom: 18px;
+  }
+  .cmp-card.bad .cmp-tag { background: var(--ink); color: var(--paper); }
+  .cmp-card h3 { margin-bottom: 20px; }
+  .cmp-card ul { list-style: none; display: flex; flex-direction: column; }
+  .cmp-card li { font-size: calc(19px * var(--font-scale)); padding: 12px 0 12px 34px; position: relative; border-bottom: 1px solid var(--ink-faint); }
+  .cmp-card li:last-child { border-bottom: none; }
+  .cmp-card.bad li::before { content: "✕"; position: absolute; left: 0; color: var(--ink); font-weight: 700; }
+  .cmp-card.good li::before { content: "✓"; position: absolute; left: 0; color: var(--ink); font-weight: 700; }
+
+  /* ============================================================
+     DECORAÇÃO — pixel-glitch + QR
+     ============================================================ */
+  .glitch { position: absolute; top: 28px; bottom: 24px; right: 0; width: 300px; z-index: 3; pointer-events: none; opacity: 0.9; }
+  .glitch.left { right: auto; left: 0; }
+  .qr {
+    position: absolute; top: 52px; right: 60px; z-index: 5;
+    display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr);
+    gap: 1.5px; padding: 4px; background: var(--paper);
+    width: 84px; height: 84px; box-shadow: 0 0 0 1.5px var(--paper);
+  }
+  .qr span { background: var(--grid); }
+  .qr span.on { background: var(--ink); }
+
+  /* ============================================================
+     ENTRADA / REVEAL
+     ============================================================ */
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1); }
+  .slide.visible .reveal { opacity: 1; transform: none; }
+  .slide.visible .reveal.d1 { transition-delay: 0.07s; }
+  .slide.visible .reveal.d2 { transition-delay: 0.14s; }
+  .slide.visible .reveal.d3 { transition-delay: 0.21s; }
+  .slide.visible .reveal.d4 { transition-delay: 0.28s; }
+  .slide.visible .reveal.d5 { transition-delay: 0.35s; }
+
+  /* ============================================================
+     HUD / NAVEGAÇÃO (fora do palco)
+     ============================================================ */
+  .hud { position: fixed; left: 0; right: 0; bottom: 0; z-index: 900; display: flex; align-items: center; justify-content: space-between; padding: 12px 26px; pointer-events: none; }
+  .hud > * { pointer-events: auto; }
+  .hud-left { display: flex; align-items: center; gap: 16px; }
+  .brand { font-family: var(--font-body); font-weight: 700; letter-spacing: 0.2em; font-size: 11px; text-transform: uppercase; color: var(--ink); }
+  .slide-dots { display: flex; gap: 6px; }
+  .dot { width: 8px; height: 8px; background: var(--ink-faint); cursor: pointer; transition: all 0.2s; }
+  .dot.active { background: var(--ink); }
+  .hud-right { display: flex; align-items: center; gap: 10px; }
+  .page-indicator { font-family: var(--font-mono); font-size: 13px; color: var(--ink); min-width: 66px; text-align: center; letter-spacing: 0.06em; }
+  .nav-btn { width: 38px; height: 38px; border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); font-size: 20px; cursor: pointer; display: grid; place-items: center; transition: all 0.15s; }
+  .nav-btn:hover:not(:disabled) { background: var(--ink); color: var(--paper); }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .font-btn { width: 34px; height: 34px; border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); font-size: 16px; cursor: pointer; display: grid; place-items: center; transition: all 0.15s; font-family: var(--font-body); font-weight: 700; line-height: 1; }
+  .font-btn:hover { background: var(--ink); color: var(--paper); }
+  .font-label { font-family: var(--font-mono); font-size: 12px; color: var(--ink); min-width: 32px; text-align: center; user-select: none; }
+
+  .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--ink); z-index: 950; transition: width 0.4s cubic-bezier(0.16,1,0.3,1); }
+
+  /* Inline editing */
+  .edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+  .edit-toggle {
+    position: fixed; top: 12px; left: 12px; z-index: 10001;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+    width: 38px; height: 38px; border: 1.5px solid var(--ink); background: var(--paper);
+    color: var(--ink); font-size: 17px; cursor: pointer;
+  }
+  .edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+  body.editing [contenteditable="true"]:hover { outline: 1px dashed var(--ink); outline-offset: 3px; }
+
+  /* ============================================================
+     DIREÇÃO VISUAL — institucional IFES
+     Releitura contemporânea do modelo de apresentação fornecido.
+     ============================================================ */
+  :root {
+    --paper: #ffffff;
+    --paper-2: #f4f6f3;
+    --ink: #29322e;
+    --ink-soft: #55615b;
+    --grid: rgba(25, 135, 65, 0.08);
+    --ink-faint: rgba(41, 50, 46, 0.14);
+    --ifes-green: #239438;
+    --ifes-green-dark: #116b2b;
+    --ifes-lime: #96c11f;
+    --ifes-red: #cf0a16;
+    --ifes-orange: #ec6941;
+    --font-display: 'Hanken Grotesk', Arial, sans-serif;
+    --font-body: 'Hanken Grotesk', Arial, sans-serif;
+    --edge: 92px;
+  }
+
+  html, body, .deck-viewport { background: #e8ebe8; }
+  .deck-stage { background: var(--paper); box-shadow: 0 24px 80px rgba(20, 46, 29, 0.18); }
+  .slide {
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  /* Faixas cromáticas do modelo institucional */
+  .slide::before {
+    inset: auto 0 0 0;
+    height: 27px;
+    z-index: 3;
+    background:
+      linear-gradient(to bottom, rgba(255,255,255,.94), rgba(255,255,255,0) 58%),
+      linear-gradient(90deg,
+        var(--ifes-green) 0 20%,
+        var(--ifes-lime) 20% 40%,
+        var(--ifes-green) 40% 60%,
+        var(--ifes-red) 60% 80%,
+        var(--ifes-lime) 80% 100%);
+    background-size: 100% 100%;
+    box-shadow: 0 -16px 28px rgba(102, 160, 61, 0.09);
+  }
+  .slide::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 8px;
+    z-index: 3;
+    background: linear-gradient(90deg,
+      var(--ifes-lime) 0 20%,
+      var(--ifes-red) 20% 40%,
+      var(--ifes-green) 40% 60%,
+      var(--ifes-lime) 60% 80%,
+      var(--ifes-green) 80% 100%);
+  }
+  .slide:not([data-slide="0"]):not([data-slide="10"])::after {
+    width: 168px;
+    right: auto;
+    height: 9px;
+    background: var(--ifes-red);
+  }
+  .hairlines::before, .hairlines::after { display: none; }
+
+  .frame { inset: 88px var(--edge) 104px; }
+  .topbar {
+    align-items: flex-end;
+    border-bottom: 1px solid rgba(41, 50, 46, 0.15);
+    padding-bottom: 20px;
+    margin-bottom: 36px;
+  }
+  .topbar h2 {
+    font-size: calc(70px * var(--font-scale));
+    line-height: 1.01;
+    max-width: 1370px;
+  }
+  h2 {
+    color: var(--ifes-red);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+  }
+  h2 em { color: var(--ifes-green-dark); font-style: normal; }
+  h3 { color: var(--ifes-green-dark); font-weight: 700; letter-spacing: -0.02em; }
+  p, li { color: var(--ink); }
+  strong { color: var(--ifes-green-dark); }
+
+  .kicker {
+    color: var(--ifes-red);
+    font-size: calc(14px * var(--font-scale));
+    font-weight: 700;
+    letter-spacing: .12em;
+  }
+  .kicker::before { background: var(--ifes-red); width: 28px; }
+  .topbar .lab { color: var(--ifes-green-dark); font-weight: 700; }
+
+  ul.fancy li { border-bottom-color: rgba(35, 148, 56, 0.16); }
+  ul.fancy li::before { content: "•"; color: var(--ifes-red); font-size: calc(22px * var(--font-scale)); top: -1px; }
+
+  .card, .cmp-card, .step-card, .anim-stage {
+    border: 1px solid rgba(35, 148, 56, 0.20);
+    border-radius: 14px;
+    background: rgba(247, 249, 246, 0.92);
+    box-shadow: 0 12px 30px rgba(31, 77, 43, 0.07);
+  }
+  .card { padding: 24px 26px; }
+  .card .num { color: var(--ifes-red); font-family: var(--font-body); font-weight: 700; }
+  .card h4 { color: var(--ifes-green-dark); letter-spacing: .08em; }
+  .card p { color: var(--ink-soft); }
+
+  .code {
+    color: #243029;
+    background: #f3f5f2;
+    border: 1px solid rgba(41, 50, 46, 0.16);
+    border-left: 6px solid var(--ifes-red);
+    border-radius: 0 12px 12px 0;
+  }
+  .code .c-key, .code .c-fn, .code .c-str { color: var(--ifes-green-dark); }
+  .code .c-hl { background: rgba(150, 193, 31, .18); box-shadow: inset 0 0 0 1px rgba(35, 148, 56, .35); }
+  .code-title { color: var(--ifes-red); border-bottom-color: rgba(207, 10, 22, .18); }
+
+  .g-edge { stroke: rgba(35, 148, 56, 0.27); }
+  .g-edge.tree, .g-edge.ret, .g-edge.new { stroke: var(--ifes-green); }
+  .g-node circle { fill: white; stroke: var(--ifes-green); }
+  .g-node text, .g-node .badge-txt { fill: var(--ifes-green-dark); }
+  .g-node .badge { fill: white; stroke: var(--ifes-green); }
+  .g-node.visited circle { fill: rgba(150, 193, 31, .16); }
+  .g-node.active circle { fill: rgba(236, 105, 65, .18); stroke: var(--ifes-red); }
+  .g-node.articulation circle { fill: var(--ifes-red); stroke: var(--ifes-red); }
+  .g-node.articulation text { fill: white; }
+
+  .btn {
+    color: var(--ifes-green-dark);
+    background: white;
+    border: 1px solid rgba(35, 148, 56, .42);
+    border-radius: 999px;
+    padding: 10px 20px;
+  }
+  .btn:hover:not(:disabled), .btn.primary { background: var(--ifes-green); color: white; border-color: var(--ifes-green); }
+  .btn.primary:hover:not(:disabled) { background: var(--ifes-green-dark); }
+
+  .val-cell { border-color: rgba(35, 148, 56, .18); border-radius: 8px; background: white; }
+  .val-cell .vn, .val-cell .vd { color: var(--ifes-green-dark); }
+  .val-cell.art { border-color: var(--ifes-red); background: rgba(207, 10, 22, .07); }
+  .step-count, .step-acao, .step-body, .step-note { color: var(--ink); }
+  .step-acao { color: var(--ifes-red); font-family: var(--font-body); font-weight: 700; }
+
+  .cmp-card.bad { border: 2px solid rgba(207, 10, 22, .42); }
+  .cmp-tag { border-radius: 999px; border-color: currentColor; color: var(--ifes-green-dark); }
+  .cmp-card.bad .cmp-tag { background: var(--ifes-red); color: white; border-color: var(--ifes-red); }
+  .cmp-card.good .cmp-tag { background: var(--ifes-green); color: white; border-color: var(--ifes-green); }
+  .cmp-card.bad li::before { color: var(--ifes-red); }
+  .cmp-card.good li::before { color: var(--ifes-green); }
+
+  .glitch, .qr { display: none !important; }
+  .pagenum {
+    right: 360px;
+    bottom: 47px;
+    color: var(--ink-soft);
+    font-weight: 500;
+    font-size: calc(13px * var(--font-scale));
+  }
+
+  .ifes-lockup {
+    position: absolute;
+    z-index: 8;
+    right: 76px;
+    bottom: 42px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #171a18;
+    font-family: Arial, sans-serif;
+  }
+  .ifes-symbol {
+    width: 40px;
+    height: 54px;
+    display: grid;
+    grid-template-columns: repeat(3, 11px);
+    grid-template-rows: repeat(4, 11px);
+    gap: 3px;
+  }
+  .ifes-symbol i { display: block; background: var(--ifes-green); border-radius: 1px; }
+  .ifes-symbol i:nth-child(1) { grid-column: 1; grid-row: 1; background: var(--ifes-red); border-radius: 50%; }
+  .ifes-symbol i:nth-child(2) { grid-column: 2; grid-row: 1; }
+  .ifes-symbol i:nth-child(3) { grid-column: 3; grid-row: 1; }
+  .ifes-symbol i:nth-child(4) { grid-column: 1; grid-row: 2; }
+  .ifes-symbol i:nth-child(5) { grid-column: 2; grid-row: 2; }
+  .ifes-symbol i:nth-child(6) { grid-column: 1; grid-row: 3; }
+  .ifes-symbol i:nth-child(7) { grid-column: 2; grid-row: 3; }
+  .ifes-symbol i:nth-child(8) { grid-column: 3; grid-row: 3; }
+  .ifes-symbol i:nth-child(9) { grid-column: 1; grid-row: 4; }
+  .ifes-symbol i:nth-child(10) { grid-column: 2; grid-row: 4; }
+  .ifes-wordmark { line-height: 1; white-space: nowrap; }
+  .ifes-wordmark strong { display: block; color: #171a18; font-size: calc(14px * var(--font-scale)); letter-spacing: .035em; }
+  .ifes-wordmark small { display: block; margin-top: 4px; font-size: calc(11px * var(--font-scale)); color: #363b38; }
+
+  /* Capa e encerramento */
+  .slide[data-slide="0"] .frame { inset: 118px 160px 112px; max-width: 1360px; }
+  .slide[data-slide="0"] h2 {
+    color: var(--ifes-green-dark);
+    font-size: calc(112px * var(--font-scale)) !important;
+    line-height: .94 !important;
+    max-width: 1220px !important;
+    margin-top: 34px !important;
+  }
+  .slide[data-slide="0"] h2 em { color: var(--ifes-red); }
+  .slide[data-slide="0"] .frame > p { color: var(--ink-soft); }
+  .slide[data-slide="0"] .frame > div:last-child { border-top-color: rgba(35, 148, 56, .28) !important; }
+  .slide[data-slide="10"] .frame { left: 160px !important; right: 160px; }
+  .slide[data-slide="10"] h2 { font-size: calc(82px * var(--font-scale)) !important; max-width: 1380px; }
+
+  .hud { padding: 10px 22px 14px; }
+  .brand, .page-indicator { color: var(--ifes-green-dark); }
+  .dot { border-radius: 999px; background: rgba(35, 148, 56, .22); }
+  .dot.active { width: 24px; background: var(--ifes-red); }
+  .nav-btn {
+    color: var(--ifes-green-dark);
+    border: 1px solid rgba(35, 148, 56, .38);
+    border-radius: 50%;
+    background: rgba(255,255,255,.94);
+  }
+  .nav-btn:hover:not(:disabled) { background: var(--ifes-green); color: white; }
+  .font-btn {
+    color: var(--ifes-green-dark);
+    border: 1px solid rgba(35, 148, 56, .38);
+    border-radius: 50%;
+    background: rgba(255,255,255,.94);
+  }
+  .font-btn:hover { background: var(--ifes-green); color: white; }
+  .font-label { color: var(--ifes-green-dark); }
+  .progress-bar { height: 4px; background: linear-gradient(90deg, var(--ifes-green), var(--ifes-lime), var(--ifes-red)); }
+
+  /* ============================================================
+     DENSIDADE E ESCALA — mais conteúdo útil, menos área ociosa
+     ============================================================ */
+  :root { --edge: 72px; }
+
+  .frame { inset: 66px var(--edge) 88px; }
+  .topbar {
+    padding-bottom: 14px;
+    margin-bottom: 24px;
+  }
+  .topbar h2 {
+    max-width: 1540px;
+    font-size: calc(82px * var(--font-scale));
+    line-height: .98;
+  }
+  .topbar .lab { font-size: calc(15px * var(--font-scale)); }
+  .kicker { font-size: calc(16px * var(--font-scale)); }
+
+  p, li { font-size: calc(26px * var(--font-scale)); line-height: 1.42; }
+  ul.fancy { gap: 10px; }
+  ul.fancy li {
+    padding-left: 34px;
+    padding-bottom: 10px;
+    font-size: calc(26px * var(--font-scale));
+    line-height: 1.38;
+  }
+  ul.fancy li::before { font-size: calc(29px * var(--font-scale)); }
+
+  .cols { gap: 42px; height: 100%; }
+  .cols > .col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .cols.wide-left { grid-template-columns: 1.08fr 1fr; }
+  .cols.wide-right { grid-template-columns: 1fr 1.08fr; }
+  .col > p { font-size: calc(28px * var(--font-scale)) !important; }
+  .cards { gap: 18px; }
+  .card { padding: 28px 30px; }
+  .card .num { font-size: calc(52px * var(--font-scale)); margin-bottom: 12px; }
+  .card h4 { font-size: calc(20px * var(--font-scale)); margin-bottom: 10px; }
+  .card p { font-size: calc(18px * var(--font-scale)); line-height: 1.48; }
+
+  .graph-box { min-height: 480px; }
+  svg.graph { max-height: 650px; }
+  .g-node text { font-size: calc(35px * var(--font-scale)); }
+  .g-node .badge-txt { font-size: calc(21px * var(--font-scale)); }
+
+  .anim-layout { gap: 28px; grid-template-columns: 1.18fr 1fr; }
+  .anim-stage { padding: 16px; }
+  .step-card { min-height: 236px; padding: 24px 28px; }
+  .step-acao { font-size: calc(34px * var(--font-scale)); }
+  .step-body { font-size: calc(22px * var(--font-scale)); }
+  .step-note { font-size: calc(15px * var(--font-scale)); }
+  .val-cell { padding: 12px 6px; }
+  .val-cell .vn { font-size: calc(18px * var(--font-scale)); }
+  .val-cell .vd { font-size: calc(14px * var(--font-scale)); }
+  .btn { font-size: calc(17px * var(--font-scale)); padding: 11px 22px; }
+
+  .cmp { gap: 28px; }
+  .cmp-card { padding: 38px 42px; }
+  .cmp-card h3 { font-size: calc(48px * var(--font-scale)); margin-bottom: 18px; }
+  .cmp-card li { font-size: calc(24px * var(--font-scale)); padding-top: 14px; padding-bottom: 14px; }
+
+  .slide[data-slide="0"] .frame {
+    inset: 84px 120px 92px;
+    max-width: 1540px;
+  }
+  .slide[data-slide="0"] h2 {
+    font-size: calc(132px * var(--font-scale)) !important;
+    max-width: 1420px !important;
+    margin-top: 26px !important;
+  }
+  .slide[data-slide="0"] .frame > p {
+    max-width: 1040px !important;
+    margin-top: 26px !important;
+    font-size: calc(28px * var(--font-scale)) !important;
+    line-height: 1.42 !important;
+  }
+  .slide[data-slide="0"] .frame > div:last-child {
+    gap: 82px !important;
+    padding-top: 16px !important;
+  }
+  .slide[data-slide="0"] .frame > div:last-child > div > div:last-child { font-size: calc(34px * var(--font-scale)) !important; }
+
+  /* Slides com maior densidade recebem escala própria para evitar cortes. */
+  .slide[data-slide="3"] .frame { top: 58px; }
+  .slide[data-slide="3"] .topbar h2 { font-size: calc(72px * var(--font-scale)); }
+  .slide[data-slide="4"] .frame { inset: 58px 72px 82px !important; }
+  .slide[data-slide="4"] .topbar h2 { font-size: calc(74px * var(--font-scale)) !important; }
+  .slide[data-slide="4"] .graph-box { min-height: 0; }
+  .slide[data-slide="8"] .topbar h2 { font-size: calc(68px * var(--font-scale)); max-width: 1640px; }
+
+  .slide[data-slide="10"] .frame { left: 112px !important; right: 112px; top: 78px; bottom: 90px; }
+  .slide[data-slide="10"] h2 { font-size: calc(96px * var(--font-scale)) !important; max-width: 1540px; }
+  .slide[data-slide="10"] .cards { margin-top: 28px !important; }
+  .slide[data-slide="10"] .frame > p { font-size: calc(24px * var(--font-scale)) !important; max-width: 1350px !important; }
+
+  @media print {
+    .deck-stage { box-shadow: none; }
+    .ifes-lockup { display: flex !important; }
+  }
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+  <main class="deck-stage" id="deckStage">
+
+    <!-- ============================================================
+         SLIDE 1 — CAPA
+         ============================================================ -->
+    <section class="slide active hairlines" data-slide="0">
+      <div class="glitch">
+        <svg width="100%" height="100%" viewBox="0 0 300 1000" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <pattern id="scan" width="10" height="10" patternUnits="userSpaceOnUse">
+              <rect width="10" height="10" fill="#F0EBDE"/>
+              <rect x="0" width="3" height="10" fill="#1F2BE0"/>
+            </pattern>
+          </defs>
+          <rect x="230" y="0" width="70" height="1000" fill="url(#scan)"/>
+          <rect x="180" y="120" width="120" height="150" fill="url(#scan)"/>
+          <rect x="130" y="430" width="170" height="120" fill="url(#scan)"/>
+          <rect x="185" y="720" width="115" height="180" fill="url(#scan)"/>
+        </svg>
+      </div>
+      <div class="qr" aria-hidden="true" id="qrCover"></div>
+      <div class="frame">
+        <div class="kicker reveal">Técnicas de Programação Avançada · Grafos</div>
+        <h2 class="reveal d1" style="font-size:calc(176px * var(--font-scale)); line-height:0.9; max-width:1300px; margin-top:26px;">
+          Grafos<br>biconexos<br>no <em>jiu-jitsu</em>
+        </h2>
+        <p class="reveal d2" style="max-width:840px; margin-top:34px; font-size:calc(24px * var(--font-scale)); line-height:1.5;">
+          Identificação de <strong>pontos de articulação</strong> em redes de treino com o algoritmo de
+          <strong>Tarjan</strong> — <span class="mono">DFS + low-link</span>, complexidade <strong>O(V + E)</strong>.
+        </p>
+        <div class="reveal d2" style="margin-top:30px; display:flex; gap:56px; flex-wrap:wrap;">
+          <div>
+            <div class="kicker" style="margin-bottom:8px;">Participantes</div>
+            <div style="font-family:var(--font-body); font-weight:600; font-size:calc(24px * var(--font-scale)); line-height:1.4;">
+              Nadson da Cruz Silva<br>José Carlos Ceccon
+            </div>
+          </div>
+          <div>
+            <div class="kicker" style="margin-bottom:8px;">Professor</div>
+            <div style="font-family:var(--font-body); font-weight:600; font-size:calc(24px * var(--font-scale)); line-height:1.4;">
+              Rafael Vargas
+            </div>
+          </div>
+        </div>
+        <div class="reveal d3" style="margin-top:auto; display:flex; gap:64px; border-top:1.5px solid var(--ink); padding-top:20px;">
+          <div><div class="kicker" style="margin-bottom:8px;">Rede</div><div style="font-family:var(--font-display);font-size:calc(30px * var(--font-scale));">5 vértices · 6 arestas</div></div>
+          <div><div class="kicker" style="margin-bottom:8px;">Diagnóstico</div><div style="font-family:var(--font-display);font-size:calc(30px * var(--font-scale));">J03 articulação</div></div>
+          <div><div class="kicker" style="margin-bottom:8px;">Solução</div><div style="font-family:var(--font-display);font-size:calc(30px * var(--font-scale));">+ aresta J02–J04</div></div>
+        </div>
+      </div>
+      <div class="pagenum">01 / 11</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 2 — CONCEITO
+         ============================================================ -->
+    <section class="slide hairlines" data-slide="1">
+      <div class="frame">
+        <div class="topbar reveal">
+          <div>
+            <div class="kicker" style="margin-bottom:14px;">Conceito</div>
+            <h2>O que é um grafo <em>biconexo</em>?</h2>
+          </div>
+          <div class="lab">§ 02<span class="speaker">Nadson da Cruz Silva</span></div>
+        </div>
+        <div class="cols wide-left" style="flex:1; align-items:start;">
+          <div class="col">
+            <p class="reveal d2" style="margin-bottom:26px; font-size:calc(26px * var(--font-scale));">
+              Um grafo conexo é <strong>biconexo</strong> (ou 2-conexo) quando continua conexo
+              após a remoção de <strong>qualquer</strong> vértice.
+            </p>
+            <ul class="fancy reveal d3">
+              <li>Não possui <strong>pontos de articulação</strong> — vértices cuja remoção desconecta o grafo.</li>
+              <li>Todo par de vértices possui ao menos <strong>dois caminhos distintos</strong> entre si.</li>
+              <li>É <strong>resiliente</strong>: nenhum único vértice é ponto crítico da rede.</li>
+            </ul>
+          </div>
+          <div class="col">
+            <div class="cards c2 reveal d2">
+              <div class="card">
+                <div class="num">V</div>
+                <h4>Vértices</h4>
+                <p>Os nós da rede. No nosso caso, membros do clube.</p>
+              </div>
+              <div class="card">
+                <div class="num">E</div>
+                <h4>Arestas</h4>
+                <p>Conexões entre vértices. Aqui, treinos em comum.</p>
+              </div>
+              <div class="card" style="grid-column: span 2;">
+                <div class="num">✕</div>
+                <h4>Articulação</h4>
+                <p>Vértice cuja remoção aumenta o número de componentes conexas. O alvo da nossa análise.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pagenum">02 / 11</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 3 — ALGORITMO
+         ============================================================ -->
+    <section class="slide hairlines" data-slide="2">
+      <div class="frame">
+        <div class="topbar reveal">
+          <div>
+            <div class="kicker" style="margin-bottom:14px;">O algoritmo</div>
+            <h2>Tarjan: DFS + <em>low-link</em></h2>
+          </div>
+          <div class="lab">§ 03<span class="speaker">Nadson da Cruz Silva</span></div>
+        </div>
+        <div class="cols" style="flex:1; align-items:start;">
+          <div class="col">
+            <p class="reveal d2" style="margin-bottom:20px; font-size:calc(21px * var(--font-scale));">
+              Uma única busca em profundidade (DFS) anota dois valores para cada vértice:
+            </p>
+            <div class="cards c2 reveal d2" style="margin-bottom:22px;">
+              <div class="card"><h4 style="font-family:var(--font-mono); letter-spacing:0.02em;">desc[v]</h4><p>Ordem em que <strong>v</strong> foi descoberto durante a DFS.</p></div>
+              <div class="card"><h4 style="font-family:var(--font-mono); letter-spacing:0.02em;">low[v]</h4><p>Menor <em>desc</em> alcançável a partir da subárvore de <strong>v</strong>.</p></div>
+            </div>
+            <p class="reveal d3" style="margin-bottom:14px; font-size:calc(19px * var(--font-scale));">
+              Um vértice <strong>u</strong> (não-raiz) é articulação quando um filho <strong>v</strong> satisfaz:
+            </p>
+            <div class="code reveal d3" style="font-size:calc(28px * var(--font-scale)); text-align:center; padding:20px;">
+              <span class="c-fn">low[v]</span> ≥ <span class="c-fn">desc[u]</span>
+            </div>
+          </div>
+          <div class="col">
+            <ul class="fancy reveal d3">
+              <li>A condição <strong>low[v] ≥ desc[u]</strong> indica que a subárvore de <strong>v</strong> não alcança nenhum ancestral de <strong>u</strong> por outra aresta.</li>
+              <li>A <strong>raiz</strong> da DFS é articulação se tiver <strong>mais de um filho</strong>.</li>
+              <li>Arestas de retorno atualizam o low-link.</li>
+              <li>Custo total: <strong>O(V + E)</strong> — linear e eficiente.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="pagenum">03 / 11</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 4 — CÓDIGO
+         ============================================================ -->
+    <section class="slide hairlines" data-slide="3">
+      <div class="frame">
+        <div class="topbar reveal">
+          <div>
+            <div class="kicker" style="margin-bottom:14px;">No código</div>
+            <h2>Os trechos que <em>importam</em></h2>
+          </div>
+          <div class="lab">§ 04<span class="speaker">Nadson da Cruz Silva</span></div>
+        </div>
+        <div class="cols" style="flex:1; align-items:stretch; gap:36px;">
+          <div class="col reveal d2" style="display:flex; flex-direction:column;">
+            <div class="code-title">dfs_articulacoes() — núcleo</div>
+             <div class="code" style="flex:1; font-size:calc(17px * var(--font-scale)); line-height:1.55;">
+<span class="c-com"># descoberta e low-link na entrada do nó</span>
+<span class="c-key">descoberta</span>[u] = <span class="c-key">low</span>[u] = <span class="c-key">self</span>.tempo
+<span class="c-key">self</span>.tempo += <span class="c-num">1</span>
+<span class="c-key">filhos_dfs</span> = <span class="c-num">0</span>
+
+<span class="c-key">for</span> v <span class="c-key">in</span> <span class="c-key">self</span>.adj[u]:
+    <span class="c-key">if</span> v <span class="c-key">not in</span> visitado:
+        filhos_dfs += <span class="c-num">1</span>
+        dfs(v, u)
+        low[u] = min(low[u], low[v])
+
+        <span class="c-com"># condição de articulação</span>
+        <span class="c-hl"><span class="c-key">if</span> pai_u <span class="c-key">is not None</span> and low[v] &gt;= descoberta[u]:
+            articulacoes.add(u)</span>
+
+    <span class="c-key">elif</span> v != pai_u:
+        <span class="c-com"># aresta de retorno</span>
+        low[u] = min(low[u], descoberta[v])
+
+<span class="c-com"># raiz com mais de um filho é articulação</span>
+<span class="c-hl"><span class="c-key">if</span> pai_u <span class="c-key">is None</span> and filhos_dfs &gt; <span class="c-num">1</span>:
+    articulacoes.add(u)</span>
+            </div>
+          </div>
+          <div class="col reveal d3" style="display:flex; flex-direction:column;">
+            <div class="code-title">Verificação &amp; simulação</div>
+             <div class="code" style="flex:1; font-size:calc(17px * var(--font-scale)); line-height:1.58;">
+<span class="c-key">def</span> <span class="c-fn">eh_biconexo</span>(<span class="c-key">self</span>):
+    articulacoes, passos = <span class="c-key">self</span>.dfs_articulacoes()
+    <span class="c-key">if</span> len(<span class="c-key">self</span>.vertices) &lt; <span class="c-num">3</span>:
+        <span class="c-key">return</span> <span class="c-key">False</span>, articulacoes, passos
+    biconexo = (len(articulacoes) == <span class="c-num">0</span>)
+    <span class="c-key">return</span> biconexo, articulacoes, passos
+
+<span class="c-key">def</span> <span class="c-fn">simular_remocao</span>(<span class="c-key">self</span>, vertice):
+    <span class="c-com"># remove o vértice e conta componentes via BFS</span>
+    restantes = [v <span class="c-key">for</span> v <span class="c-key">in</span> <span class="c-key">self</span>.vertices
+                 <span class="c-key">if</span> v != vertice]
+    <span class="c-com"># ... conta componentes conexas</span>
+    <span class="c-key">return</span> len(componentes) == <span class="c-num">1</span>, componentes
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pagenum">04 / 11</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 5 — ANIMAÇÃO DFS
+         ============================================================ -->
+    <section class="slide hairlines" data-slide="4">
+      <div class="frame" style="bottom:88px;">
+        <div class="topbar reveal">
+          <div>
+            <div class="kicker" style="margin-bottom:12px;">Passo a passo</div>
+            <h2 style="font-size:calc(64px * var(--font-scale));">A DFS <em>em ação</em></h2>
+          </div>
+          <div class="lab">§ 05<span class="speaker">Nadson da Cruz Silva</span></div>
+        </div>
+        <div class="anim-layout reveal d2" style="flex:1; min-height:0;">
+          <div class="anim-stage">
+            <div class="graph-box" id="animGraph"></div>
+          </div>
+          <div class="anim-side">
+            <div class="step-card">
+              <div class="step-head">
+                <span class="step-count" id="stepCount">Passo 0 / 13</span>
+                <span class="step-acao" id="stepAcao">Pronto</span>
+              </div>
+              <div class="step-body" id="stepBody">
+                Clique em <strong>Próximo →</strong> para iniciar a busca em profundidade a partir da raiz <span class="mono">J01</span>.
+              </div>
+              <div class="step-note" id="stepNote"></div>
+            </div>
+            <div class="val-table" id="valTable"></div>
+            <div class="controls">
+              <button class="btn" id="btnPrev" disabled>← Anterior</button>
+              <button class="btn primary" id="btnNext">Próximo →</button>
+              <button class="btn" id="btnReset">↺ Reset</button>
+              <button class="btn" id="btnAuto">▶ Auto</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pagenum">05 / 11</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 6 — CONTEXTO
+         ============================================================ -->
+    <section class="slide hairlines" data-slide="5">
+      <div class="frame">
+        <div class="topbar reveal">
+          <div>
+            <div class="kicker" style="margin-bottom:14px;">Aplicação prática</div>
+            <h2>O clube de <em>jiu-jitsu</em></h2>
+          </div>
+          <div class="lab">§ 06<span class="speaker">Nadson da Cruz Silva</span></div>
+        </div>
+        <div class="cols wide-left" style="flex:1; align-items:center;">
+          <div class="col">
+            <p class="reveal d2" style="margin-bottom:22px; font-size:calc(26px * var(--font-scale));">
+              Traduzimos o problema abstrato para uma rede real de treino:
+            </p>
+            <ul class="fancy reveal d3">
+              <li><strong>Vértices</strong> → alunos e professores (J01 … J05).</li>
+              <li><strong>Arestas</strong> → dois membros que treinaram juntos <strong>≥ 3 sessões</strong> no mês.</li>
+              <li><strong>Objetivo</strong> → descobrir se algum membro é ponto único de conexão da rede.</li>
+            </ul>
+            <p class="reveal d4" style="margin-top:22px; font-size:calc(19px * var(--font-scale)); opacity:0.8;">
+              A rede forma <strong>dois triângulos</strong> ligados por um único vértice.
+            </p>
+          </div>
+          <div class="col graph-box reveal d3" id="graphContext"></div>
+        </div>
+      </div>
+      <div class="pagenum">06 / 11</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 7 — DIAGNÓSTICO
+         ============================================================ -->
+    <section class="slide hairlines" data-slide="6">
+      <div class="frame">
+        <div class="topbar reveal">
+          <div>
+            <div class="kicker" style="margin-bottom:14px;">Diagnóstico</div>
+            <h2>J03 é o <em>ponto de dependência</em></h2>
+          </div>
+          <div class="lab">§ 07<span class="speaker">José Carlos Ceccon</span></div>
+        </div>
+        <div class="cols wide-right" style="flex:1; align-items:center;">
+          <div class="col graph-box reveal d2" id="graphArticulation"></div>
+          <div class="col">
+            <p class="reveal d2" style="margin-bottom:22px; font-size:calc(26px * var(--font-scale));">
+              A DFS identifica <strong>J03</strong> como a única <strong>articulação</strong> da rede original:
+            </p>
+            <ul class="fancy reveal d3" style="margin-bottom:24px;">
+              <li>Pertence ao triângulo <strong>{J01, J02, J03}</strong> e também a <strong>{J03, J04, J05}</strong>.</li>
+              <li>É a única ponte entre os dois grupos.</li>
+              <li>Um “gargalo humano”: se J03 parar, os grupos perdem contato.</li>
+            </ul>
+            <div class="code reveal d4" style="font-size:calc(20px * var(--font-scale));">
+<span class="c-com"># saída do algoritmo</span>
+articulações = [<span class="c-str">'J03'</span>]
+biconexo = <span class="c-key">False</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pagenum">07 / 11</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 8 — SIMULAÇÃO
+         ============================================================ -->
+    <section class="slide hairlines" data-slide="7">
+      <div class="frame">
+        <div class="topbar reveal">
+          <div>
+            <div class="kicker" style="margin-bottom:14px;">Simulação</div>
+            <h2>Removendo <em>J03</em>…</h2>
+          </div>
+          <div class="lab">§ 08<span class="speaker">José Carlos Ceccon</span></div>
+        </div>
+        <div class="cols wide-left" style="flex:1; align-items:center;">
+          <div class="col">
+            <p class="reveal d2" style="margin-bottom:24px; font-size:calc(26px * var(--font-scale));">
+              Ao sair da rede, J03 desconecta o clube em <strong>duas componentes isoladas</strong>:
+            </p>
+            <div class="cards c2 reveal d3" style="margin-bottom:24px;">
+              <div class="card"><h4>Componente 1</h4><p class="mono" style="font-size:calc(26px * var(--font-scale)); opacity:1; margin-top:6px;">{ J01, J02 }</p></div>
+              <div class="card"><h4>Componente 2</h4><p class="mono" style="font-size:calc(26px * var(--font-scale)); opacity:1; margin-top:6px;">{ J04, J05 }</p></div>
+            </div>
+            <div class="controls reveal d4">
+              <button class="btn primary" id="btnRemoveNode">✕ Remover J03</button>
+              <button class="btn" id="btnRestoreNode">↺ Restaurar</button>
+            </div>
+          </div>
+          <div class="col graph-box reveal d3" id="graphRemoval"></div>
+        </div>
+      </div>
+      <div class="pagenum">08 / 11</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 9 — SOLUÇÃO
+         ============================================================ -->
+    <section class="slide hairlines" data-slide="8">
+      <div class="frame">
+        <div class="topbar reveal">
+          <div>
+            <div class="kicker" style="margin-bottom:14px;">Solução</div>
+            <h2>Rede <em>biconexa</em>: adicionar J02–J04</h2>
+          </div>
+          <div class="lab">§ 09<span class="speaker">José Carlos Ceccon</span></div>
+        </div>
+        <div class="cols wide-right" style="flex:1; align-items:center;">
+          <div class="col graph-box reveal d2" id="graphSolution"></div>
+          <div class="col">
+            <p class="reveal d2" style="margin-bottom:22px; font-size:calc(26px * var(--font-scale));">
+              Uma única aresta nova cria um <strong>caminho alternativo</strong> entre os dois grupos, eliminando a dependência de J03.
+            </p>
+            <ul class="fancy reveal d3" style="margin-bottom:24px;">
+              <li>Elimina a articulação <strong>J03</strong>.</li>
+              <li>Torna o grafo <strong>biconexo</strong> — nenhum membro é crítico.</li>
+              <li>Suporta treinos conjuntos e integração entre os grupos.</li>
+            </ul>
+            <div class="code reveal d4" style="font-size:calc(20px * var(--font-scale));">
+<span class="c-com"># grafo_biconexo.txt (7 arestas)</span>
+J02 J04   <span class="c-com">← aresta adicionada</span>
+articulações = [ ]
+biconexo = <span class="c-key">True</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pagenum">09 / 11</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 10 — COMPARAÇÃO
+         ============================================================ -->
+    <section class="slide hairlines" data-slide="9">
+      <div class="frame">
+        <div class="topbar reveal">
+          <div>
+            <div class="kicker" style="margin-bottom:14px;">Antes e depois</div>
+            <h2>Comparação das <em>redes</em></h2>
+          </div>
+          <div class="lab">§ 10<span class="speaker">José Carlos Ceccon</span></div>
+        </div>
+        <div class="cmp reveal d2" style="flex:1; align-items:start;">
+          <div class="cmp-card bad">
+            <span class="cmp-tag">Grafo Original</span>
+            <h3>Vulnerável</h3>
+            <ul>
+              <li>5 vértices · 6 arestas</li>
+              <li>J03 é <strong>articulação única</strong></li>
+              <li>Remover J03 → <strong>2 componentes</strong></li>
+              <li>Não é biconexo</li>
+            </ul>
+          </div>
+          <div class="cmp-card good">
+            <span class="cmp-tag">Grafo Biconexo</span>
+            <h3>Resiliente</h3>
+            <ul>
+              <li>5 vértices · 7 arestas <strong>(+1)</strong></li>
+              <li>Nenhum ponto de articulação</li>
+              <li>Remover qualquer vértice → <strong>1 componente</strong></li>
+              <li>É biconexo ✓</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="pagenum">10 / 11</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 11 — CONCLUSÃO (colophon)
+         ============================================================ -->
+    <section class="slide hairlines" data-slide="10">
+      <div class="glitch left">
+        <svg width="100%" height="100%" viewBox="0 0 300 1000" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <pattern id="scan2" width="10" height="10" patternUnits="userSpaceOnUse">
+              <rect width="10" height="10" fill="#F0EBDE"/>
+              <rect x="0" width="3" height="10" fill="#1F2BE0"/>
+            </pattern>
+          </defs>
+          <rect x="0" y="0" width="70" height="1000" fill="url(#scan2)"/>
+          <rect x="0" y="200" width="120" height="160" fill="url(#scan2)"/>
+          <rect x="0" y="520" width="170" height="120" fill="url(#scan2)"/>
+          <rect x="0" y="780" width="115" height="180" fill="url(#scan2)"/>
+        </svg>
+      </div>
+      <div class="frame" style="left:260px;">
+        <div class="kicker reveal">Conclusão</div>
+        <div class="lab reveal" style="margin-top:14px;">§ 11<span class="speaker">José Carlos Ceccon</span></div>
+        <h2 class="reveal d1" style="font-size:calc(96px * var(--font-scale)); line-height:0.96; margin-top:20px;">Grafos biconexos tornam a <em>rede mais forte</em></h2>
+        <div class="cards c3 reveal d2" style="margin-top:40px;">
+          <div class="card"><div class="num">1</div><h4>Algoritmo eficiente</h4><p>Uma DFS com low-link encontra articulações em O(V + E).</p></div>
+          <div class="card"><div class="num">2</div><h4>Diagnóstico claro</h4><p>J03 identificado como ponto único de dependência na rede.</p></div>
+          <div class="card"><div class="num">3</div><h4>Solução mínima</h4><p>Uma aresta (J02–J04) elimina a vulnerabilidade da rede.</p></div>
+        </div>
+        <p class="reveal d3" style="margin-top:auto; border-top:1.5px solid var(--ink); padding-top:18px; font-size:calc(21px * var(--font-scale)); max-width:1100px;">
+          O mesmo raciocínio se aplica a <strong>redes de e-mail</strong>, infraestrutura,
+          cadeias de suprimentos — qualquer rede que precise de <strong>resiliência</strong>.
+        </p>
+        <div class="reveal d3" style="margin-top:22px; display:flex; gap:60px; flex-wrap:wrap;">
+          <div>
+            <div class="kicker" style="margin-bottom:6px;">Participantes</div>
+            <div style="font-family:var(--font-body); font-weight:600; font-size:calc(20px * var(--font-scale)); line-height:1.4;">
+              Nadson da Cruz Silva · José Carlos Ceccon
+            </div>
+          </div>
+          <div>
+            <div class="kicker" style="margin-bottom:6px;">Professor</div>
+            <div style="font-family:var(--font-body); font-weight:600; font-size:calc(20px * var(--font-scale)); line-height:1.4;">
+              Rafael Vargas
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pagenum">11 / 11</div>
+    </section>
+
+  </main>
+</div>
+
+<div class="progress-bar" id="progressBar"></div>
+<div class="hud">
+  <div class="hud-left">
+    <span class="brand">Grafos Biconexos</span>
+    <div class="slide-dots" id="slideDots"></div>
+  </div>
+  <div class="hud-right">
+    <button class="font-btn" id="fontDown" aria-label="Diminuir fonte" title="Diminuir fonte">A⁻</button>
+    <span class="font-label" id="fontLabel">100%</span>
+    <button class="font-btn" id="fontUp" aria-label="Aumentar fonte" title="Aumentar fonte">A⁺</button>
+    <span class="page-indicator" id="pageIndicator">01 / 11</span>
+    <button class="nav-btn" id="navPrev" aria-label="Anterior">‹</button>
+    <button class="nav-btn" id="navNext" aria-label="Próximo">›</button>
+  </div>
+</div>
+
+<div class="edit-hotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Modo edição (E)">✏️</button>
+
+<script>
+(function () {
+  "use strict";
+
+  /* Assinatura institucional adicionada a todos os slides. */
+  const ifesMark = `
+    <div class="ifes-lockup" aria-label="Instituto Federal do Espírito Santo">
+      <span class="ifes-symbol" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </span>
+      <span class="ifes-wordmark">
+        <strong>INSTITUTO FEDERAL</strong>
+        <small>Espírito Santo</small>
+      </span>
+    </div>`;
+  document.querySelectorAll(".slide").forEach(slide => {
+    slide.insertAdjacentHTML("beforeend", ifesMark);
+  });
+
+  /* =========================================================
+     1. DADOS — grafo e trace real (algoritmo_biconexo.py)
+     ========================================================= */
+  const VERTICES = ["J01", "J02", "J03", "J04", "J05"];
+  const POS = {
+    J01: { x: 160, y: 150 }, J02: { x: 300, y: 360 }, J03: { x: 420, y: 210 },
+    J04: { x: 640, y: 330 }, J05: { x: 560, y: 500 },
+  };
+  const EDGES_ORIG = [
+    ["J01","J02"],["J01","J03"],["J02","J03"],
+    ["J03","J04"],["J03","J05"],["J04","J05"],
+  ];
+  const NEW_EDGE = ["J02","J04"];
+
+  const STEPS = [
+    { passo:1, acao:"Visitar", vertice:"J01", pai:"-", desc:0, low:0, articulacao:"" },
+    { passo:2, acao:"Visitar", vertice:"J02", pai:"J01", desc:1, low:1, articulacao:"" },
+    { passo:3, acao:"Visitar", vertice:"J03", pai:"J02", desc:2, low:2, articulacao:"" },
+    { passo:4, acao:"Aresta retorno J03→J01", vertice:"J03", pai:"J02", desc:2, low:0, articulacao:"low[J03] = min(low[J03], desc[J01]) = 0" },
+    { passo:5, acao:"Visitar", vertice:"J04", pai:"J03", desc:3, low:3, articulacao:"" },
+    { passo:6, acao:"Visitar", vertice:"J05", pai:"J04", desc:4, low:4, articulacao:"" },
+    { passo:7, acao:"Aresta retorno J05→J03", vertice:"J05", pai:"J04", desc:4, low:2, articulacao:"low[J05] = min(low[J05], desc[J03]) = 2" },
+    { passo:8, acao:"Retorno J05→J04", vertice:"J04", pai:"J03", desc:3, low:2, articulacao:"low[J05]=2, desc[J04]=3" },
+    { passo:9, acao:"Retorno J04→J03", vertice:"J03", pai:"J02", desc:2, low:0, articulacao:"✓ J03 é ARTICULAÇÃO (low[J04]=2 >= desc[J03]=2)" },
+    { passo:10, acao:"Aresta retorno J03→J05", vertice:"J03", pai:"J02", desc:2, low:0, articulacao:"low[J03] = min(low[J03], desc[J05]) = 0" },
+    { passo:11, acao:"Retorno J03→J02", vertice:"J02", pai:"J01", desc:1, low:0, articulacao:"low[J03]=0, desc[J02]=1" },
+    { passo:12, acao:"Retorno J02→J01", vertice:"J01", pai:"-", desc:0, low:0, articulacao:"low[J02]=0, desc[J01]=0" },
+    { passo:13, acao:"Aresta retorno J01→J03", vertice:"J01", pai:"-", desc:0, low:0, articulacao:"low[J01] = min(low[J01], desc[J03]) = 0" },
+  ];
+
+  /* QR-block cover: 8x8 mosaic hand-authored */
+  (function () {
+    const qr = document.getElementById("qrCover");
+    const on = new Set([0,1,2,3,4,5,7,8,9,10,13,14,16,19,21,22,24,26,27,30,32,33,35,37,40,41,42,43,45,46,48,51,53,54,56,58,59,61,62,63]);
+    for (let i = 0; i < 64; i++) {
+      const s = document.createElement("span");
+      if (on.has(i)) s.classList.add("on");
+      qr.appendChild(s);
+    }
+  })();
+
+  /* =========================================================
+     2. GRAFO SVG
+     ========================================================= */
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  const NODE_R = 46;
+  function edgeKey(a, b) { return a < b ? a + "|" + b : b + "|" + a; }
+
+  function buildGraph(container, opts) {
+    opts = opts || {};
+    const edges = opts.edges || EDGES_ORIG;
+    container.innerHTML = "";
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("viewBox", "0 0 800 620");
+    svg.setAttribute("class", "graph");
+    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    const edgeLayer = document.createElementNS(SVG_NS, "g");
+    const nodeLayer = document.createElementNS(SVG_NS, "g");
+    svg.appendChild(edgeLayer); svg.appendChild(nodeLayer);
+
+    const edgeEls = {};
+    function addEdge(a, b) {
+      const line = document.createElementNS(SVG_NS, "line");
+      line.setAttribute("x1", POS[a].x); line.setAttribute("y1", POS[a].y);
+      line.setAttribute("x2", POS[b].x); line.setAttribute("y2", POS[b].y);
+      line.setAttribute("class", "g-edge");
+      line.dataset.a = a; line.dataset.b = b;
+      edgeLayer.appendChild(line);
+      edgeEls[edgeKey(a, b)] = line;
+    }
+    edges.forEach(([a, b]) => addEdge(a, b));
+    if (opts.newEdge) addEdge(opts.newEdge[0], opts.newEdge[1]);
+
+    const nodeEls = {};
+    VERTICES.forEach((v) => {
+      const g = document.createElementNS(SVG_NS, "g");
+      g.setAttribute("class", "g-node");
+      g.setAttribute("transform", `translate(${POS[v].x},${POS[v].y})`);
+      g.dataset.v = v;
+      const circle = document.createElementNS(SVG_NS, "circle");
+      circle.setAttribute("r", NODE_R);
+      g.appendChild(circle);
+      const label = document.createElementNS(SVG_NS, "text");
+      label.textContent = v; g.appendChild(label);
+      if (opts.showValues) {
+        const badge = document.createElementNS(SVG_NS, "circle");
+        badge.setAttribute("class", "badge");
+        badge.setAttribute("cx", NODE_R - 2); badge.setAttribute("cy", -NODE_R + 2);
+        badge.setAttribute("r", 26); g.appendChild(badge);
+        const btxt = document.createElementNS(SVG_NS, "text");
+        btxt.setAttribute("class", "badge-txt");
+        btxt.setAttribute("x", NODE_R - 2); btxt.setAttribute("y", -NODE_R + 2);
+        btxt.setAttribute("text-anchor", "middle"); btxt.setAttribute("dominant-baseline", "central");
+        btxt.textContent = ""; g.appendChild(btxt); g._badge = btxt;
+      }
+      nodeLayer.appendChild(g); nodeEls[v] = g;
+    });
+    container.appendChild(svg);
+    return { svg, edgeEls, nodeEls };
+  }
+
+  function setNodeState(nodeEl, state) {
+    if (!nodeEl) return;
+    nodeEl.classList.remove("visited", "active", "articulation", "removed");
+    if (state) nodeEl.classList.add(state);
+  }
+  function setEdgeClass(el, cls) {
+    if (!el) return;
+    el.classList.remove("tree", "ret", "new", "dim");
+    if (cls) el.classList.add(cls);
+  }
+
+  /* =========================================================
+     3. PALCO FIXO
+     ========================================================= */
+  const stage = document.getElementById("deckStage");
+  function scaleStage() {
+    const f = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    const x = (window.innerWidth - 1920 * f) / 2;
+    const y = (window.innerHeight - 1080 * f) / 2;
+    stage.style.transform = `translate(${x}px, ${y}px) scale(${f})`;
+  }
+  scaleStage();
+  window.addEventListener("resize", scaleStage);
+
+  /* =========================================================
+     4. NAVEGAÇÃO
+     ========================================================= */
+  const slides = Array.from(document.querySelectorAll(".slide"));
+  const dotsWrap = document.getElementById("slideDots");
+  const pageIndicator = document.getElementById("pageIndicator");
+  const progressBar = document.getElementById("progressBar");
+  const navPrev = document.getElementById("navPrev");
+  const navNext = document.getElementById("navNext");
+  let current = 0;
+
+  slides.forEach((s, i) => {
+    const dot = document.createElement("div");
+    dot.className = "dot" + (i === 0 ? " active" : "");
+    dot.addEventListener("click", () => goTo(i));
+    dotsWrap.appendChild(dot);
+  });
+  const dots = Array.from(dotsWrap.children);
+  function pad(n) { return String(n).padStart(2, "0"); }
+
+  function syncHud(idx) {
+    dots.forEach((d, i) => d.classList.toggle("active", i === idx));
+    pageIndicator.textContent = pad(idx + 1) + " / " + pad(slides.length);
+    progressBar.style.width = ((idx + 1) / slides.length * 100) + "%";
+    navPrev.disabled = idx === 0;
+    navNext.disabled = idx === slides.length - 1;
+  }
+  function showSlide(idx) {
+    if (idx < 0 || idx >= slides.length || idx === current) return;
+    slides[current].classList.remove("active", "visible");
+    current = idx;
+    const next = slides[idx];
+    next.classList.add("active");
+    void next.offsetWidth;
+    next.classList.add("visible");
+    syncHud(idx);
+    if (history.replaceState) history.replaceState(null, "", "#slide-" + (idx + 1));
+  }
+  function goTo(idx) { showSlide(idx); }
+
+  navPrev.addEventListener("click", () => goTo(current - 1));
+  navNext.addEventListener("click", () => goTo(current + 1));
+  document.addEventListener("keydown", (e) => {
+    if (e.target && e.target.closest && e.target.closest(".anim-side")) return;
+    if (e.target && e.target.getAttribute && e.target.getAttribute("contenteditable") === "true") return;
+    if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); goTo(current + 1); }
+    else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); goTo(current - 1); }
+    else if (e.key === "Home") { goTo(0); }
+    else if (e.key === "End") { goTo(slides.length - 1); }
+  });
+
+  let touchX = null;
+  document.addEventListener("touchstart", (e) => { touchX = e.changedTouches[0].clientX; }, { passive: true });
+  document.addEventListener("touchend", (e) => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50) { dx < 0 ? goTo(current + 1) : goTo(current - 1); }
+    touchX = null;
+  }, { passive: true });
+
+  slides[0].classList.add("visible");
+  syncHud(0);
+  (function () {
+    const m = (location.hash || "").match(/slide-(\d+)/);
+    if (m) {
+      const target = Math.max(0, Math.min(slides.length - 1, parseInt(m[1], 10) - 1));
+      if (target !== 0) {
+        slides[0].classList.remove("active", "visible");
+        current = target;
+        slides[target].classList.add("active", "visible");
+        syncHud(target);
+      }
+    }
+  })();
+
+  /* =========================================================
+     5. GRÁFICOS ESTÁTICOS
+     ========================================================= */
+  buildGraph(document.getElementById("graphContext"), { edges: EDGES_ORIG });
+  {
+    const g = buildGraph(document.getElementById("graphArticulation"), { edges: EDGES_ORIG });
+    setNodeState(g.nodeEls.J03, "articulation");
+    ["J01","J02","J04","J05"].forEach((v) => setNodeState(g.nodeEls[v], "visited"));
+  }
+
+  let removalBuilt = null;
+  function initRemovalGraph() {
+    if (!removalBuilt) removalBuilt = buildGraph(document.getElementById("graphRemoval"), { edges: EDGES_ORIG });
+    return removalBuilt;
+  }
+  const btnRemoveNode = document.getElementById("btnRemoveNode");
+  const btnRestoreNode = document.getElementById("btnRestoreNode");
+  function applyRemoval(removed) {
+    const g = initRemovalGraph();
+    VERTICES.forEach((v) => {
+      const el = g.nodeEls[v];
+      if (removed) {
+        if (v === "J03") setNodeState(el, "removed");
+        else setNodeState(el, (v === "J01" || v === "J02") ? "visited" : "active");
+      } else setNodeState(el, "");
+    });
+    EDGES_ORIG.forEach(([a, b]) => {
+      const el = g.edgeEls[edgeKey(a, b)];
+      if (removed && (a === "J03" || b === "J03")) setEdgeClass(el, "dim");
+      else setEdgeClass(el, "");
+    });
+    gsap.fromTo(g.nodeEls.J03, { scale: 1 }, { scale: removed ? 0.9 : 1, duration: 0.4, ease: "back.out(1.7)" });
+  }
+  btnRemoveNode.addEventListener("click", () => applyRemoval(true));
+  btnRestoreNode.addEventListener("click", () => applyRemoval(false));
+
+  {
+    const g = buildGraph(document.getElementById("graphSolution"), { edges: EDGES_ORIG, newEdge: NEW_EDGE });
+    setEdgeClass(g.edgeEls[edgeKey(NEW_EDGE[0], NEW_EDGE[1])], "new");
+    VERTICES.forEach((v) => setNodeState(g.nodeEls[v], "visited"));
+  }
+
+  /* =========================================================
+     6. ANIMAÇÃO DFS
+     ========================================================= */
+  const animGraph = buildGraph(document.getElementById("animGraph"), { edges: EDGES_ORIG, showValues: true });
+  const { nodeEls, edgeEls } = animGraph;
+
+  const stepCount = document.getElementById("stepCount");
+  const stepAcao = document.getElementById("stepAcao");
+  const stepBody = document.getElementById("stepBody");
+  const stepNote = document.getElementById("stepNote");
+  const valTable = document.getElementById("valTable");
+  const btnPrev = document.getElementById("btnPrev");
+  const btnNext = document.getElementById("btnNext");
+  const btnReset = document.getElementById("btnReset");
+  const btnAuto = document.getElementById("btnAuto");
+
+  const valCells = {};
+  VERTICES.forEach((v) => {
+    const cell = document.createElement("div");
+    cell.className = "val-cell";
+    cell.innerHTML = `<div class="vn">${v}</div><div class="vd">–</div>`;
+    valTable.appendChild(cell);
+    valCells[v] = cell;
+  });
+
+  let stepIdx = -1;
+  let autoTimer = null;
+
+  function resetAnim() {
+    stepIdx = -1; stopAuto();
+    VERTICES.forEach((v) => {
+      setNodeState(nodeEls[v], "");
+      nodeEls[v].dataset.everVisited = "";
+      if (nodeEls[v]._badge) { nodeEls[v]._badge.textContent = ""; gsap.set(nodeEls[v]._badge, { opacity: 1 }); }
+      valCells[v].className = "val-cell";
+      valCells[v].querySelector(".vd").textContent = "–";
+    });
+    EDGES_ORIG.concat([NEW_EDGE]).forEach(([a, b]) => setEdgeClass(edgeEls[edgeKey(a, b)], ""));
+    stepCount.textContent = "Passo 0 / " + STEPS.length;
+    stepAcao.textContent = "Pronto";
+    stepBody.innerHTML = 'Clique em <strong>Próximo →</strong> para iniciar a busca em profundidade a partir da raiz <span class="mono">J01</span>.';
+    stepNote.textContent = "";
+    btnPrev.disabled = true; btnNext.disabled = false;
+    gsap.fromTo(nodeEls.J01, { scale: 1.15 }, { scale: 1, duration: 0.5, ease: "power2.out" });
+  }
+
+  function stepEdgePair(acao) {
+    const m = acao.match(/(J\d\d)→(J\d\d)/);
+    return m ? [m[1], m[2]] : null;
+  }
+
+  function applyStep(i) {
+    const s = STEPS[i];
+    const isArt = /ARTICULAÇÃO/.test(s.articulacao);
+    VERTICES.forEach((v) => {
+      const el = nodeEls[v];
+      if (v === s.vertice) setNodeState(el, isArt ? "articulation" : "active");
+      else if (el.dataset.everVisited === "1") { if (!el.classList.contains("articulation")) setNodeState(el, "visited"); }
+      else setNodeState(el, "");
+    });
+    if (/^Visitar/.test(s.acao) && s.vertice !== "J03") nodeEls[s.vertice].dataset.everVisited = "1";
+    if (/^Visitar/.test(s.acao) && s.vertice === "J03" && isArt) nodeEls[s.vertice].dataset.everVisited = "1";
+
+    const nd = nodeEls[s.vertice];
+    if (nd._badge) nd._badge.textContent = s.low;
+
+    const pair = stepEdgePair(s.acao);
+    if (pair) setEdgeClass(edgeEls[edgeKey(pair[0], pair[1])], /Aresta retorno/.test(s.acao) ? "ret" : "tree");
+
+    const cell = valCells[s.vertice];
+    cell.classList.add("has");
+    cell.querySelector(".vd").textContent = "d" + s.desc + " · l" + s.low;
+    if (isArt) cell.classList.add("art");
+
+    stepCount.textContent = "Passo " + s.passo + " / " + STEPS.length;
+    stepAcao.textContent = s.acao;
+
+    let body = "";
+    if (/^Visitar/.test(s.acao)) {
+      body = `Descoberto <span class="mono">${s.vertice}</span> · pai <span class="mono">${s.pai}</span> · <span class="mono">desc=${s.desc}</span>, <span class="mono">low=${s.low}</span>`;
+    } else if (isArt) {
+      body = `A subárvore de <span class="mono">${pair ? pair[0] : ""}</span> não alcança ancestral de <span class="mono">${s.vertice}</span> por outra aresta → <strong>ponto de articulação!</strong>`;
+    } else if (/Aresta retorno/.test(s.acao)) {
+      body = `Aresta de retorno atualiza o low-link: <span class="mono">low[${s.vertice}]=${s.low}</span>`;
+    } else {
+      body = `Retorno da DFS em <span class="mono">${s.vertice}</span> · <span class="mono">desc=${s.desc}</span>, <span class="mono">low=${s.low}</span>`;
+    }
+    stepBody.innerHTML = body;
+    stepNote.textContent = s.articulacao || "";
+
+    gsap.fromTo(nd, { scale: 1.18 }, { scale: 1, duration: 0.45, ease: "back.out(1.8)", transformOrigin: "center" });
+    btnPrev.disabled = i === 0;
+    btnNext.disabled = i === STEPS.length - 1;
+    if (isArt) {
+      setNodeState(nd, "articulation");
+      nodeEls[s.vertice].dataset.everVisited = "1";
+      gsap.fromTo(nd, { filter: "drop-shadow(0 0 0px rgba(31,43,224,0))" },
+        { filter: "drop-shadow(0 0 20px rgba(31,43,224,0.7))", duration: 0.6, yoyo: true, repeat: 1 });
+    }
+  }
+
+  function nextStep() { if (stepIdx >= STEPS.length - 1) return; stepIdx++; applyStep(stepIdx); }
+  function prevStep() { if (stepIdx <= 0) { resetAnim(); return; } rebuildTo(stepIdx - 1); }
+  function rebuildTo(target) {
+    stopAuto();
+    VERTICES.forEach((v) => {
+      nodeEls[v].dataset.everVisited = "";
+      setNodeState(nodeEls[v], "");
+      if (nodeEls[v]._badge) nodeEls[v]._badge.textContent = "";
+      valCells[v].className = "val-cell";
+      valCells[v].querySelector(".vd").textContent = "–";
+    });
+    EDGES_ORIG.concat([NEW_EDGE]).forEach(([a, b]) => setEdgeClass(edgeEls[edgeKey(a, b)], ""));
+    stepIdx = -1;
+    for (let k = 0; k <= target; k++) { stepIdx = k; applyStep(k); }
+  }
+
+  btnNext.addEventListener("click", () => { stopAuto(); nextStep(); });
+  btnPrev.addEventListener("click", () => { stopAuto(); prevStep(); });
+  btnReset.addEventListener("click", resetAnim);
+  function stopAuto() { if (autoTimer) { clearInterval(autoTimer); autoTimer = null; btnAuto.textContent = "▶ Auto"; } }
+  btnAuto.addEventListener("click", () => {
+    if (autoTimer) { stopAuto(); return; }
+    btnAuto.textContent = "⏸ Pausar";
+    if (stepIdx >= STEPS.length - 1) resetAnim();
+    autoTimer = setInterval(() => {
+      if (stepIdx >= STEPS.length - 1) { stopAuto(); return; }
+      nextStep();
+    }, 1700);
+  });
+
+  resetAnim();
+  initRemovalGraph();
+
+  /* =========================================================
+      7. INLINE EDITING
+      ========================================================= */
+  (function () {
+    let active = false;
+    const toggle = document.getElementById("editToggle");
+    const hotzone = document.querySelector(".edit-hotzone");
+    function setActive(on) {
+      active = on;
+      document.body.classList.toggle("editing", on);
+      toggle.classList.toggle("active", on);
+      document.querySelectorAll(".slide.active h2, .slide.active h3, .slide.active h4, .slide.active p, .slide.active li, .slide.active .step-body, .slide.active .step-note, .slide.active .code").forEach((el) => {
+        if (on) el.setAttribute("contenteditable", "true"); else el.removeAttribute("contenteditable");
+      });
+    }
+    function toggleEditMode() { setActive(!active); }
+    toggle.addEventListener("click", toggleEditMode);
+    let hideTimeout = null;
+    hotzone.addEventListener("mouseenter", () => { clearTimeout(hideTimeout); toggle.classList.add("show"); });
+    hotzone.addEventListener("mouseleave", () => { hideTimeout = setTimeout(() => { if (!active) toggle.classList.remove("show"); }, 400); });
+    toggle.addEventListener("mouseenter", () => clearTimeout(hideTimeout));
+    toggle.addEventListener("mouseleave", () => { hideTimeout = setTimeout(() => { if (!active) toggle.classList.remove("show"); }, 400); });
+    hotzone.addEventListener("click", toggleEditMode);
+    document.addEventListener("keydown", (e) => {
+      if ((e.key === "e" || e.key === "E") && !e.target.getAttribute("contenteditable")) toggleEditMode();
+    });
+  })();
+
+  /* =========================================================
+      8. CONTROLE DE FONTE
+      ========================================================= */
+  (function () {
+    const SCALES = [0.8, 0.9, 1.0, 1.15, 1.3, 1.5, 1.75, 2.0];
+    let scaleIdx = 2; // default: 1.0 (100%)
+
+    const fontDown = document.getElementById("fontDown");
+    const fontUp = document.getElementById("fontUp");
+    const fontLabel = document.getElementById("fontLabel");
+
+    function applyScale(s) {
+      document.documentElement.style.setProperty("--font-scale", s);
+      fontLabel.textContent = Math.round(s * 100) + "%";
+      try { localStorage.setItem("deck-font-scale-idx", scaleIdx); } catch (_) {}
+    }
+
+    fontDown.addEventListener("click", () => {
+      if (scaleIdx <= 0) return;
+      scaleIdx--;
+      applyScale(SCALES[scaleIdx]);
+    });
+
+    fontUp.addEventListener("click", () => {
+      if (scaleIdx >= SCALES.length - 1) return;
+      scaleIdx++;
+      applyScale(SCALES[scaleIdx]);
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.target && e.target.getAttribute && e.target.getAttribute("contenteditable") === "true") return;
+      if (e.target && e.target.closest && e.target.closest(".anim-side")) return;
+      if ((e.key === "+" || e.key === "=") && e.ctrlKey) { e.preventDefault(); fontUp.click(); }
+      else if (e.key === "-" && e.ctrlKey) { e.preventDefault(); fontDown.click(); }
+      else if (e.key === "0" && e.ctrlKey) { e.preventDefault(); scaleIdx = 2; applyScale(SCALES[scaleIdx]); }
+    });
+
+    // restore from localStorage
+    try {
+      const saved = localStorage.getItem("deck-font-scale-idx");
+      if (saved !== null) {
+        const idx = parseInt(saved, 10);
+        if (idx >= 0 && idx < SCALES.length) { scaleIdx = idx; }
+      }
+    } catch (_) {}
+    applyScale(SCALES[scaleIdx]);
+  })();
+
+})();
+</script>
+</body>
+</html>
