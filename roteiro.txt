@@ -1,201 +1,331 @@
 ==============================================================================
-ROTEIRO DE APRESENTAÇÃO
+ROTEIRO DE APRESENTAÇÃO COMPLETO (18 a 20 MINUTOS)
 Grafos Biconexos no Jiu-Jitsu — Técnicas de Programação Avançada · IFES
 ==============================================================================
 
 Participantes : Nadson da Cruz Silva · José Carlos Ceccon
-Professor     : Rafael Vargas
+Professor     : Rafael Vargas Mesquita
+Tempo Alvo    : 18 a 20 minutos (aprox. 9 min Nadson + 9 min José Carlos + perguntas)
 
 ------------------------------------------------------------------------------
-DIVISÃO
+DIVISÃO DOS SLIDES
 ------------------------------------------------------------------------------
-PARTE 1 — Nadson da Cruz Silva .......... slides 01 a 06
-PARTE 2 — José Carlos Ceccon ........... slides 07 a 11
+PARTE 1 — Nadson da Cruz Silva .......... slides 01 a 08 (~9 minutos)
+PARTE 2 — José Carlos Ceccon ........... slides 09 a 14 (~9 minutos)
 
 ==============================================================================
-PARTE 1 — NADSON DA CRUZ SILVA
-==============================================================================
-
-------------------------------------------------------------------------------
-SLIDE 01 — CAPA  (Nadson)
-------------------------------------------------------------------------------
-Olá a todos. Somos Nadson da Cruz Silva e José Carlos Ceccon, e o professor
-responsável é Rafael Vargas.
-
-Nosso trabalho se chama "Grafos Biconexos no Jiu-Jitsu". Vamos mostrar como
-um conceito de Teoria dos Grafos — os pontos de articulação — resolve um
-problema concreto: identificar membros que, se saírem de uma rede de treino,
-desconectam o grupo.
-
-O problema será resolvido com o algoritmo de Tarjan, baseado em DFS com
-low-link, que roda em tempo linear O(V + E). Eu começo apresentando o conceito
-e o algoritmo; depois o José Carlos mostra o diagnóstico e a solução.
-
-------------------------------------------------------------------------------
-SLIDE 02 — O QUE É UM GRAFO BICONEXO?  (Nadson)
-------------------------------------------------------------------------------
-Um grafo conexo é biconexo — ou 2-conexo — quando continua conexo mesmo depois
-de removermos QUALQUER vértice. Em outras palavras, ele não tem pontos de
-articulação.
-
-Daí decorrem duas propriedades importantes: todo par de vértices possui ao
-menos dois caminhos distintos entre si, e a rede é resiliente, porque nenhum
-único vértice é ponto crítico.
-
-À direita, a base do vocabulário: os vértices V são os nós — aqui, os membros
-do clube; as arestas E são as conexões — os treinos em comum. E a articulação é
-justamente o vértice cuja remoção aumenta o número de componentes conexas. É o
-alvo da nossa análise.
-
-------------------------------------------------------------------------------
-SLIDE 03 — TARJAN: DFS + LOW-LINK  (Nadson)
-------------------------------------------------------------------------------
-Como descobrimos as articulações? Com uma única busca em profundidade, a DFS,
-que anota dois valores para cada vértice.
-
-O primeiro é desc[v]: a ordem em que o vértice v foi descoberto. O segundo é
-low[v]: o menor desc alcançável a partir da subárvore de v.
-
-A regra central: um vértice u — que não seja a raiz — é ponto de articulação
-quando existe um filho v tal que low[v] é maior ou igual a desc[u]. Isso
-significa que a subárvore de v não consegue alcançar nenhum ancestral de u por
-nenhuma outra aresta.
-
-Um caso especial: a raiz da DFS é articulação se tiver mais de um filho. E as
-arestas de retorno são o que atualiza o low-link. O custo total é O(V + E) —
-linear, portanto eficiente.
-
-------------------------------------------------------------------------------
-SLIDE 04 — OS TRECHOS DE CÓDIGO QUE IMPORTAM  (Nadson)
-------------------------------------------------------------------------------
-Aqui está o núcleo em código.
-
-No primeiro bloco, na entrada de cada nó, marcamos descoberta[u] e low[u] com o
-tempo atual. Para cada vizinho v, se ele ainda não foi visitado, descemos na DFS
-e atualizamos low[u] com o mínimo entre low[u] e low[v].
-
-O trecho destacado em verde é a condição de articulação: se u não é a raiz e
-low[v] é maior ou igual a descoberta[u], então u entra no conjunto de
-articulações.
-
-No segundo bloco, o elif trata a aresta de retorno, atualizando o low com a
-descoberta do vértice visitado. E, ao final, o caso da raiz: se ela não tem pai
-e teve mais de um filho, também é articulação.
-
-À direita, os métodos de verificação — eh_biconexo e simular_remocao — que usam
-esse resultado e a contagem de componentes para confirmar o diagnóstico.
-
-------------------------------------------------------------------------------
-SLIDE 05 — A DFS EM AÇÃO  (Nadson — demonstração ao vivo)
-------------------------------------------------------------------------------
-Agora quero mostrar o algoritmo rodando passo a passo.
-
-(Clique em "Próximo" algumas vezes e explique conforme avança.)
-
-Começamos na raiz J01. Visitamos J02, depois J03. Quando encontramos a aresta de
-retorno J03→J01, o low de J03 cai para zero.
-
-Seguimos para J04 e J05, e a aresta de retorno J05→J03 baixa o low de J05.
-
-No retorno J04→J03 aparece a confirmação: low[J04] é igual a desc[J03], então
-J03 é ARTICULAÇÃO.
-
-Podem acompanhar na tabela os valores de descoberta e low de cada vértice, e no
-badge sobre cada nó. Se quiserem, uso o botão "Auto" para rodar sozinho.
-
-------------------------------------------------------------------------------
-SLIDE 06 — O CLUBE DE JIU-JITSU  (Nadson)
-------------------------------------------------------------------------------
-Para tornar o problema concreto, traduzimos tudo para uma rede real de treino.
-
-Os vértices são alunos e professores, de J01 a J05. As arestas ligam dois
-membros que treinaram juntos pelo menos 3 sessões no mês. E o objetivo é
-descobrir se algum membro é ponto único de conexão da rede.
-
-Observem o grafo à direita: a rede forma dois triângulos — {J01, J02, J03} e
-{J03, J04, J05} — ligados por um único vértice. Guardem essa imagem, porque o
-José Carlos vai mostrar o que isso significa.
-
-(Passa a palavra ao José Carlos.)
-
-==============================================================================
-PARTE 2 — JOSÉ CARLOS CECCON
+PARTE 1 — NADSON DA CRUZ SILVA (Conceitos, Algoritmo, Teste de Mesa e Contexto)
 ==============================================================================
 
 ------------------------------------------------------------------------------
-SLIDE 07 — J03 É O PONTO DE DEPENDÊNCIA  (José Carlos)
+SLIDE 01 — CAPA  (Nadson — ~1 min)
 ------------------------------------------------------------------------------
-Obrigado, Nadson. Continuando a partir do grafo que ele apresentou.
+Olá professor Rafael Vargas, colegas e a todos presentes.
+Meu nome é Nadson da Cruz Silva e, juntamente com meu colega José Carlos Ceccon,
+apresentamos hoje o Trabalho 02 da disciplina Técnicas de Programação Avançada:
+"Grafos Biconexos no Jiu-Jitsu".
 
-A DFS identifica J03 como a única articulação da rede original. Percebam por
-quê: J03 pertence ao triângulo {J01, J02, J03} e também ao triângulo
-{J03, J04, J05}. Ou seja, é a única ponte entre os dois grupos.
+O objetivo deste projeto é aplicar os conceitos de algoritmos de busca em grafos
+para resolver um problema concreto e prático: identificar membros que atuam como
+pontos de articulação — isto é, gargalos humanos cuja ausência provocaria a
+desconexão de grupos de treino.
 
-Se J03 parar, os grupos perdem contato — é um verdadeiro gargalo humano.
+Para isso, implementamos o algoritmo linear de Tarjan, baseado em Busca em
+Profundidade (DFS) com cálculo de tempos de descoberta e low-link, executando
+em complexidade ótima O(V + E).
 
-No código abaixo, a saída do algoritmo confirma: articulações = ['J03'] e
-biconexo = False.
-
-------------------------------------------------------------------------------
-SLIDE 08 — REMOVENDO J03  (José Carlos — demonstração ao vivo)
-------------------------------------------------------------------------------
-Vamos simular a saída de J03.
-
-(Clique em "Remover J03".)
-
-Como previsto, o clube se parte em duas componentes isoladas: {J01, J02} e
-{J04, J05}. Nenhum membro de um grupo consegue mais treinar ou se comunicar com
-o outro.
-
-Reparem no grafo: as arestas que ligavam a J03 ficam esmaecidas e o nó aparece
-como removido. É a prova visual de que J03 era mesmo o ponto crítico.
-
-(Pode clicar em "Restaurar" para voltar ao estado original.)
+Eu iniciarei apresentando a fundamentação teórica, a mecânica matemática do
+algoritmo, a demonstração da DFS e o teste de mesa formal solicitado no edital.
+Em seguida, o José Carlos assumirá para detalhar o diagnóstico do gargalo, a
+simulação de remoção, a solução arquitetural com arestas de redundância e as
+aplicações no mundo real.
 
 ------------------------------------------------------------------------------
-SLIDE 09 — REDE BICONEXA: ADICIONAR J02–J04  (José Carlos)
+SLIDE 02 — O QUE É UM GRAFO BICONEXO?  (Nadson — ~1m30s)
 ------------------------------------------------------------------------------
-A solução é mínima: uma única aresta nova entre J02 e J04.
+Para começarmos pelo conceito fundamental: o que define um grafo biconexo?
 
-Essa aresta cria um caminho alternativo entre os dois grupos, eliminando a
-dependência de J03. Com isso, o grafo passa a ser biconexo — nenhum membro é
-crítico — e a rede suporta treinos conjuntos e integração entre os grupos.
+Dizemos que um grafo conexo é biconexo — ou 2-conexo — quando ele permanece conexo
+mesmo após a remoção de QUALQUER um de seus vértices.
 
-No código: adicionamos a aresta J02–J04, o grafo passa a ter 7 arestas,
-articulações ficam vazias e biconexo = True. A aresta nova aparece destacada no
-grafo à esquerda.
+Em termos práticos e topológicos, isso implica duas propriedades cruciais:
+1. Ele NÃO possui nenhum ponto de articulação (ou vértice de corte). Uma articulação
+   é justamente um nó cuja exclusão aumenta o número de componentes conexas.
+2. Entre qualquer par de vértices u e v, existem pelo menos DOIS caminhos disjuntos
+   em vértices. Ou seja, se um caminho falhar, o tráfego pode fluir pelo alternativo.
 
-------------------------------------------------------------------------------
-SLIDE 10 — COMPARAÇÃO DAS REDES  (José Carlos)
-------------------------------------------------------------------------------
-Fazendo o antes e depois lado a lado:
+Portanto, um grafo biconexo é sinônimo de resiliência e redundância estrutural.
 
-À esquerda, o grafo original é vulnerável — 5 vértices e 6 arestas, J03 é
-articulação única, e remover J03 gera 2 componentes. Não é biconexo.
-
-À direita, o grafo biconexo é resiliente — 5 vértices e 7 arestas, só uma a
-mais. Não há ponto de articulação, e remover qualquer vértice deixa o grafo com
-1 componente. É biconexo.
-
-A diferença entre vulnerável e resiliente é literalmente uma aresta.
+No nosso vocabulário de modelagem:
+- Vértices V representam os praticantes (alunos e professores J01 a J05).
+- Arestas E representam os treinos realizados em conjunto (duplas com pelo menos
+  3 treinos no mês).
+- Articulação é o atleta crítico: se ele faltar ou trocar de academia, turmas
+  inteiras perdem o vínculo de treino entre si.
 
 ------------------------------------------------------------------------------
-SLIDE 11 — CONCLUSÃO  (José Carlos — fechamento; agradecimento em nome dos dois)
+SLIDE 03 — TARJAN: DFS + LOW-LINK  (Nadson — ~1m30s)
 ------------------------------------------------------------------------------
-Para concluir, três pontos:
+Como identificamos essas articulações de forma rápida sem precisar testar a
+remoção de cada vértice por força bruta?
+Utilizamos o clássico Algoritmo de Tarjan (1972).
 
-Primeiro, o algoritmo é eficiente: uma DFS com low-link encontra articulações em
-O(V + E).
+Com uma única travessia em profundidade (DFS), mantemos duas anotações em cada nó:
+1. desc[v] (Tempo de Descoberta): um contador incremental que registra a ordem
+   cronológica em que o vértice v foi alcançado na árvore de busca.
+2. low[v] (Low-link): o menor tempo de descoberta alcançável a partir de v e de
+   sua subárvore descendente, utilizando arestas da árvore e no máximo uma
+   aresta de retorno (back-edge).
 
-Segundo, o diagnóstico é claro: J03 foi identificado como o ponto único de
-dependência da rede.
+A regra de ouro de Tarjan se divide em dois casos:
+- Vértice interno (não-raiz): Um vértice u é articulação se ele possuir pelo menos
+  um filho v na árvore DFS que satisfaça:
+                      low[v] >= desc[u]
+  Isso prova matematicamente que a subárvore enraizada em v não possui nenhuma
+  aresta de retorno para os ancestrais de u. Portanto, toda a comunicação de v
+  com o resto do grafo é obrigatoriamente afunilada por u.
+- Raiz da DFS: A raiz é um caso especial. Ela não tem ancestrais acima, logo ela
+  é articulação se, e somente se, tiver DOIS ou mais filhos independentes na
+  árvore de busca DFS.
 
-Terceiro, a solução é mínima: uma aresta, J02–J04, elimina a vulnerabilidade.
+Custo total: com listas de adjacência, visitamos cada vértice e cada aresta uma
+única vez, resultando em O(V + E).
 
-E o mais importante: esse mesmo raciocínio se aplica a redes de e-mail, a
-infraestrutura, a cadeias de suprimentos — qualquer rede que precise de
-resiliência.
+------------------------------------------------------------------------------
+SLIDE 04 — OS TRECHOS DE CÓDIGO QUE IMPORTAM  (Nadson — ~1m15s)
+------------------------------------------------------------------------------
+Aqui observamos a materialização desse raciocínio no nosso script Python.
 
-Somos Nadson da Cruz Silva e José Carlos Ceccon. Muito obrigado pela atenção.
+No primeiro bloco, na entrada do nó u, inicializamos `descoberta[u]` e `low[u]`
+com o tempo corrente da DFS e incrementamos o relógio global.
 
+Ao iterar pelos vizinhos v em `self.adj[u]`:
+- Se v ainda não foi visitado, ele se torna um filho na árvore DFS. Descemos na
+  recursão e, na volta, propagamos o low: `low[u] = min(low[u], low[v])`.
+  Imediatamente testamos a condição de corte: se `low[v] >= descoberta[u]`,
+  adicionamos u ao conjunto de articulações.
+- Se v já foi visitado e não é o pai imediato de u, detectamos uma aresta de
+  retorno! Nesse caso, atualizamos `low[u] = min(low[u], descoberta[v])`.
+
+No segundo bloco, temos os métodos de diagnóstico `eh_biconexo()`, que checa
+se o grafo possui ao menos 3 vértices conexos e zero articulações, e
+`simular_remocao()`, que valida experimentalmente via BFS o particionamento
+do grafo caso o vértice seja expulso da rede.
+
+------------------------------------------------------------------------------
+SLIDE 05 — A DFS EM AÇÃO  (Nadson — Demonstração interativa ao vivo — ~1m45s)
+------------------------------------------------------------------------------
+Agora quero convidar vocês a acompanharem a execução passo a passo do algoritmo
+direto no nosso ambiente interativo.
+
+(Demonstração usando os botões 'Próximo →' ou 'Auto'):
+- Passo 1: Partimos da raiz J01. desc=0, low=0.
+- Passo 2: Avançamos pela aresta de árvore até J02. desc=1, low=1.
+- Passo 3: Descemos até J03. desc=2, low=2.
+- Passo 4: Atenção aqui! J03 enxerga J01, que já havia sido visitado. É uma aresta
+  de retorno J03→J01. O low[J03] cai de 2 para 0, pois J01 foi descoberto no tempo 0!
+- Passo 5 e 6: A DFS continua desbravando o segundo triângulo: alcança J04 (desc=3,
+  low=3) e depois J05 (desc=4, low=4).
+- Passo 7: Em J05, encontramos a aresta de retorno J05→J03. O low de J05 cai para 2.
+- Passo 8: Voltamos de J05 para J04, atualizando low[J04] para 2.
+- Passo 9: O MOMENTO CRÍTICO! Retornando de J04 para J03:
+  Testamos: low[J04] >= desc[J03]? Temos low[J04]=2 e desc[J03]=2.
+  2 >= 2 é VERDADEIRO! J03 é formalmente marcado como ARTICULAÇÃO.
+  Isso ocorre porque o grupo {J04, J05} não conseguiu alcançar ninguém anterior
+  a J03.
+
+Vejam na tabela interativa abaixo do grafo como os badges de cada nó refletem
+fielmente o estado da memória.
+
+------------------------------------------------------------------------------
+SLIDE 06 — O TESTE DE MESA FORMAL  (Nadson — ~1m30s)
+------------------------------------------------------------------------------
+Atendendo à exigência expressa do edital do Trabalho 02, sintetizamos aqui a tabela
+completa do Teste de Mesa da DFS sobre o arquivo 'grafo_original.txt'.
+
+O teste de mesa rastreia os 13 eventos cronológicos da busca:
+- As visitas e avanço de profundidade;
+- As arestas de retorno que puxam o valor de low para baixo;
+- E os retornos de recursão onde a condição `low[v] >= desc[u]` é checada.
+
+Notem na linha destacada em vermelho (Passo 9):
+Quando o nó J03 recebe o retorno de seu filho J04, o low de J04 é 2 e a descoberta
+de J03 é 2. Como 2 >= 2, o algoritmo prova que não existe nenhum caminho de fuga
+por fora de J03.
+
+Além desta visualização no slide, geramos e disponibilizamos para o professor o
+arquivo oficial em Excel: 'teste_de_mesa_biconexo.xlsx', contendo duas abas:
+o trace completo do Grafo Original (13 passos) e o trace do Grafo Biconexo (15 passos),
+com formatação condicional, vetores de cada vértice e pilhas de execução.
+
+------------------------------------------------------------------------------
+SLIDE 07 — O CLUBE DE JIU-JITSU  (Nadson — ~1m)
+------------------------------------------------------------------------------
+Para trazer esses números para a vida prática, modelamos o clube de Jiu-Jitsu.
+O cenário é composto por 5 integrantes:
+- Vértices: Alunos e professores de J01 a J05.
+- Arestas: Representam duplas que treinaram juntas ao menos 3 vezes no mês.
+
+Visualmente, o grafo original é formado por dois triângulos distintos:
+O primeiro triângulo é formado por {J01, J02, J03}.
+O segundo triângulo é formado por {J03, J04, J05}.
+
+Percebam que eles se tocam em exatamente um único ponto: o vértice J03.
+Para aprofundar essa modelagem visual e passar para o diagnóstico e solução,
+eu passo a palavra agora para o meu colega José Carlos.
+
+------------------------------------------------------------------------------
+SLIDE 08 — MODELAGEM VISUAL: DO TATAME AO GRAFO  (Nadson / José Carlos — ~1m15s)
+------------------------------------------------------------------------------
+(Transição de fala)
+Nadson: "Nesta imagem gerada por inteligência artificial, vemos a representação
+artística do tatame de Jiu-Jitsu onde cada atleta é um nó interligado por alavancas
+e conexões de treino..."
+
+José Carlos assume:
+"Obrigado, Nadson. Como o Nadson destacou, no tatame, o Jiu-Jitsu é a arte das
+conexões biomecânicas. Quando extrapolamos isso para a dinâmica social da academia,
+acontece um fenômeno muito comum:
+Temos a turma da manhã — formada por J01 e J02 — e a turma da noite — formada
+por J04 e J05. Essas turmas nunca se encontram diretamente devido à rotina de
+trabalho e estudos dos participantes.
+
+Quem é J03? J03 é aquele atleta ou instrutor dedicado que tem disponibilidade
+para treinar tanto de manhã quanto à noite.
+Sem perceber, o clube concentrou toda a integração técnica e comunicação entre
+os turnos sobre os ombros de uma única pessoa. Isso cria uma fragilidade oculta,
+que o nosso algoritmo diagnostica com precisão cirúrgica."
+
+
+==============================================================================
+PARTE 2 — JOSÉ CARLOS CECCON (Diagnóstico, Simulação, Solução e Aplicações)
+==============================================================================
+
+------------------------------------------------------------------------------
+SLIDE 09 — J03 É O PONTO DE DEPENDÊNCIA  (José Carlos — ~1m15s)
+------------------------------------------------------------------------------
+Continuando a análise: a execução sobre 'grafo_original.txt' nos dá o veredito:
+- Articulações encontradas: ['J03']
+- É Biconexo? False.
+
+J03 é o clássico 'gargalo humano' ou ponto único de dependência.
+Ele pertence simultaneamente ao subgrafo {J01, J02, J03} e ao subgrafo {J03, J04, J05}.
+Toda e qualquer técnica, aviso da gerência ou interação entre os dois blocos
+precisa passar por ele.
+
+Se o professor ou gestor do clube analisar apenas o número bruto de conexões
+(temos 5 pessoas e 6 arestas, densidade aparentemente razoável), ele pode achar
+que a rede é segura. Mas a Teoria dos Grafos revela que a topologia é frágil.
+
+------------------------------------------------------------------------------
+SLIDE 10 — SIMULANDO A REMOÇÃO DE J03  (José Carlos — ~1m30s)
+------------------------------------------------------------------------------
+Vamos testar empiricamente o que acontece se J03 for retirado.
+(Clique no botão '✕ Remover J03' no slide):
+
+Vejam a animação na tela: as arestas ligadas a J03 desaparecem e o nó fica esmaecido.
+Instantaneamente, o grafo se rompe em DUAS componentes conexas isoladas:
+- Componente 1: { J01, J02 }
+- Componente 2: { J04, J05 }
+
+O número de componentes subiu de 1 para 2. Essa é a definição exata de articulação!
+Na prática do clube: se J03 sofre uma lesão, troca de faixa ou muda de cidade,
+a turma da manhã e a turma da noite perdem totalmente o contato técnico.
+Nenhuma troca de conhecimento flui entre elas.
+
+(Clique em '↺ Restaurar' para restabelecer a rede).
+
+------------------------------------------------------------------------------
+SLIDE 11 — SOLUÇÃO: REDE BICONEXA ADICIONANDO J02–J04  (José Carlos — ~1m30s)
+------------------------------------------------------------------------------
+Como sanar essa vulnerabilidade gastando o mínimo de recursos?
+Não precisamos fazer todos treinarem com todos. Basta uma INTERVENÇÃO MÍNIMA:
+Adicionar uma única aresta de integração entre J02 e J04.
+
+No contexto do clube: o professor pode organizar um 'aulão de sábado' ou incentivar
+que o aluno J02 faça uma sessão conjunta com o aluno J04.
+
+Com essa aresta:
+1. Criamos um caminho alternativo disjunto: agora, para ir do grupo 1 ao grupo 2,
+   podemos passar por J03 OU por J02–J04.
+2. Executamos novamente o algoritmo de Tarjan com o arquivo 'grafo_biconexo.txt'
+   (agora com 7 arestas).
+3. O resultado: Lista de articulações = VAZIA!
+4. O grafo passa a ser BICONEXO (True).
+Nenhum membro isolado tem mais o poder de desconectar o grupo.
+
+------------------------------------------------------------------------------
+SLIDE 12 — COMPARAÇÃO DAS REDES (ANTES E DEPOIS)  (José Carlos — ~1m15s)
+------------------------------------------------------------------------------
+Colocando o diagnóstico e a solução lado a lado:
+
+À esquerda, o Grafo Original:
+- 5 vértices e 6 arestas.
+- Possui articulação: J03.
+- Remover J03 divide a rede em 2 componentes.
+- Veredito: Vulnerável, não-biconexo.
+
+À direita, o Grafo Biconexo Proposto:
+- 5 vértices e 7 arestas (apenas UMA aresta a mais).
+- Zero pontos de articulação.
+- A remoção de qualquer vértice (seja J01, J02, J03, J04 ou J05) mantém os
+  vértices restantes em 1 única componente conexa!
+- Veredito: Resiliente, 2-conexo e tolerante a falhas.
+
+A diferença entre um sistema vulnerável e uma rede resiliente foi exatamente
+uma conexão estratégica bem planejada.
+
+------------------------------------------------------------------------------
+SLIDE 13 — APLICAÇÕES NO MUNDO REAL & RESILIÊNCIA  (José Carlos — ~1m45s)
+------------------------------------------------------------------------------
+Nesta imagem artística gerada por IA, vemos a representação de redes de alta
+disponibilidade com rotas duplas e malha redundante.
+
+Queremos enfatizar ao professor e à turma que o clube de Jiu-Jitsu foi a nossa
+metáfora didática, mas a matemática de Tarjan e dos grafos biconexos é a espinha
+dorsal da infraestrutura moderna:
+
+1. Internet e Redes de Computadores:
+   Em protocolos de roteamento como BGP e OSPF, articulações são conhecidas como
+   SPOF (Single Points of Failure). Roteadores biconexos garantem que, se um link
+   ou switch queimar, os pacotes encontram rotas alternativas sem queda de serviço.
+
+2. Engenharia Elétrica e Redes de Potência:
+   Em malhas de distribuição de alta tensão, subestações de energia precisam ser
+   biconexas. A perda de uma linha não pode causar o colapso (blecaute em cascata)
+   de cidades inteiras.
+
+3. Logística e Supply Chain:
+   Cadeias de suprimento globais usam biconexidade para evitar que a interrupção
+   de um porto ou rodovia desabasteça centros populacionais.
+
+4. Comunicação Institucional no IFES:
+   Um estudo recente de 2022 demonstrou a decomposição biconexa na rede de e-mails
+   institucionais, mapeando gargalos onde chefias ou secretarias concentravam
+   mensagens, criando atrasos crônicos caso o servidor se ausentasse.
+
+------------------------------------------------------------------------------
+SLIDE 14 — CONCLUSÃO E FECHAMENTO  (José Carlos & Nadson — ~1m30s)
+------------------------------------------------------------------------------
+José Carlos:
+Para sintetizar os resultados do nosso trabalho:
+1. Algoritmo Eficiente: Tarjan resolve o problema em tempo linear O(V + E), viável
+   mesmo para redes com centenas de milhares de conexões.
+2. Diagnóstico Preciso: Identificamos J03 como ponto crítico antes que qualquer
+   ruptura acontecesse.
+3. Solução Ótima e Econômica: Uma única aresta (J02–J04) elevou a topologia para
+   biconexa.
+
+Nadson:
+Entregamos todos os artefatos exigidos pelo professor Rafael Vargas:
+- O código-fonte em Python ('algoritmo_biconexo.py') documentado e modular;
+- Os dois arquivos de entrada ('grafo_original.txt' e 'grafo_biconexo.txt');
+- A planilha oficial de Teste de Mesa em Excel ('teste_de_mesa_biconexo.xlsx');
+- A apresentação interativa com SVG animado e ilustrações contextuais.
+
+Estamos muito satisfeitos com a aplicação prática e abrimos a palavra para as
+perguntas e considerações do professor e dos colegas. Muito obrigado a todos!
+
+==============================================================================
+FIM DO ROTEIRO
 ==============================================================================

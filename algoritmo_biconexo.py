@@ -13,6 +13,7 @@ Contexto:
   - Objetivo: identificar "pontos de dependência" (articulações) na rede de treino
 """
 
+import os
 from collections import defaultdict
 
 
@@ -51,14 +52,19 @@ class Grafo:
         with open(arquivo, 'r', encoding='utf-8') as f:
             linhas = [l.strip() for l in f if l.strip()]
 
-        # Primeira linha: número de vértices
+        # Primeira linha: número de vértices (V)
         self.num_vertices = int(linhas[0])
+
+        # Se a segunda linha for apenas um número inteiro, é o número de arestas E (padrão Sedgewick)
+        linhas_arestas = linhas[1:]
+        if len(linhas_arestas) > 0 and len(linhas_arestas[0].split()) == 1 and linhas_arestas[0].isdigit():
+            linhas_arestas = linhas_arestas[1:]
 
         # Restante: arestas
         vertices_set = set()
-        for linha in linhas[1:]:
+        for linha in linhas_arestas:
             partes = linha.split()
-            if len(partes) == 2:
+            if len(partes) >= 2:
                 u, v = partes[0], partes[1]
                 # Adiciona aresta em ambas as direções (grafo não-dirigido)
                 self.adj[u].append(v)
@@ -71,8 +77,8 @@ class Grafo:
         # para consistência no trace da DFS
         seen = set()
         self.vertices = []
-        for linha in linhas[1:]:
-            for v in linha.split():
+        for linha in linhas_arestas:
+            for v in linha.split()[:2]:
                 if v not in seen:
                     self.vertices.append(v)
                     seen.add(v)
@@ -336,8 +342,10 @@ def main():
     print("▶ PARTE 1: Grafo Original (grafo_original.txt)")
     print("-" * 70)
 
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    caminho_orig = os.path.join(script_dir, "grafo_original.txt") if not os.path.exists("grafo_original.txt") else "grafo_original.txt"
     grafo_orig = Grafo()
-    grafo_orig.carregar_txt("grafo_original.txt")
+    grafo_orig.carregar_txt(caminho_orig)
 
     print()
     print("  Executando DFS com identificação de articulações...")
@@ -392,8 +400,9 @@ def main():
     print("  Estratégia: adicionar aresta J02-J04 para eliminar a articulação J03.")
     print()
 
+    caminho_bic = os.path.join(script_dir, "grafo_biconexo.txt") if not os.path.exists("grafo_biconexo.txt") else "grafo_biconexo.txt"
     grafo_bic = Grafo()
-    grafo_bic.carregar_txt("grafo_biconexo.txt")
+    grafo_bic.carregar_txt(caminho_bic)
 
     print()
     print("  Executando DFS com identificação de articulações...")

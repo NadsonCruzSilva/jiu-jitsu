@@ -392,7 +392,7 @@
       var(--ifes-lime) 60% 80%,
       var(--ifes-green) 80% 100%);
   }
-  .slide:not([data-slide="0"]):not([data-slide="10"])::after {
+  .slide:not([data-slide="0"]):not([data-slide="13"])::after {
     width: 168px;
     right: auto;
     height: 9px;
@@ -544,8 +544,8 @@
   .slide[data-slide="0"] h2 em { color: var(--ifes-red); }
   .slide[data-slide="0"] .frame > p { color: var(--ink-soft); }
   .slide[data-slide="0"] .frame > div:last-child { border-top-color: rgba(35, 148, 56, .28) !important; }
-  .slide[data-slide="10"] .frame { left: 160px !important; right: 160px; }
-  .slide[data-slide="10"] h2 { font-size: calc(82px * var(--font-scale)) !important; max-width: 1380px; }
+  .slide[data-slide="13"] .frame { left: 160px !important; right: 160px; }
+  .slide[data-slide="13"] h2 { font-size: calc(82px * var(--font-scale)) !important; max-width: 1380px; }
 
   .hud { padding: 10px 22px 14px; }
   .brand, .page-indicator { color: var(--ifes-green-dark); }
@@ -659,12 +659,93 @@
   .slide[data-slide="4"] .frame { inset: 58px 72px 82px !important; }
   .slide[data-slide="4"] .topbar h2 { font-size: calc(74px * var(--font-scale)) !important; }
   .slide[data-slide="4"] .graph-box { min-height: 0; }
-  .slide[data-slide="8"] .topbar h2 { font-size: calc(68px * var(--font-scale)); max-width: 1640px; }
+  .slide[data-slide="8"] .topbar h2, .slide[data-slide="10"] .topbar h2 { font-size: calc(68px * var(--font-scale)); max-width: 1640px; }
 
-  .slide[data-slide="10"] .frame { left: 112px !important; right: 112px; top: 78px; bottom: 90px; }
-  .slide[data-slide="10"] h2 { font-size: calc(96px * var(--font-scale)) !important; max-width: 1540px; }
-  .slide[data-slide="10"] .cards { margin-top: 28px !important; }
-  .slide[data-slide="10"] .frame > p { font-size: calc(24px * var(--font-scale)) !important; max-width: 1350px !important; }
+  .slide[data-slide="13"] .frame { left: 112px !important; right: 112px; top: 78px; bottom: 90px; }
+  .slide[data-slide="13"] h2 { font-size: calc(96px * var(--font-scale)) !important; max-width: 1540px; }
+  .slide[data-slide="13"] .cards { margin-top: 28px !important; }
+  .slide[data-slide="13"] .frame > p { font-size: calc(24px * var(--font-scale)) !important; max-width: 1350px !important; }
+
+  /* ============================================================
+     IMAGENS GERADAS POR IA E TABELA DE TESTE DE MESA
+     ============================================================ */
+  .img-frame {
+    border: 1.5px solid var(--ink);
+    background: var(--paper-2);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 6px 6px 0px rgba(31, 43, 224, 0.12);
+    height: 100%;
+    max-height: 560px;
+    display: flex;
+    flex-direction: column;
+  }
+  .img-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    flex: 1;
+    display: block;
+  }
+  .img-caption {
+    background: rgba(240, 235, 222, 0.95);
+    border-top: 1.5px solid var(--ink);
+    padding: 12px 18px;
+    font-family: var(--font-mono);
+    font-size: calc(13px * var(--font-scale));
+    line-height: 1.4;
+    color: var(--ink);
+  }
+  .tm-table-wrap {
+    border: 1.5px solid var(--ink);
+    background: var(--paper);
+    overflow: hidden;
+    box-shadow: 6px 6px 0px rgba(31, 43, 224, 0.10);
+  }
+  .tm-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: calc(13px * var(--font-scale));
+  }
+  .tm-table th {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 8px 6px;
+    text-align: center;
+    font-weight: 500;
+    font-size: calc(12px * var(--font-scale));
+    letter-spacing: 0.04em;
+    border-right: 1px solid rgba(255, 255, 255, 0.18);
+  }
+  .tm-table th:last-child { border-right: none; }
+  .tm-table td {
+    padding: 6px 6px;
+    border-bottom: 1px solid var(--ink-faint);
+    border-right: 1px solid var(--ink-faint);
+    text-align: center;
+    color: var(--ink);
+  }
+  .tm-table td:last-child { border-right: none; }
+  .tm-table tr:nth-child(even) { background: rgba(31, 43, 224, 0.03); }
+  .tm-table tr.highlight-art {
+    background: rgba(224, 31, 60, 0.14) !important;
+    font-weight: 700;
+  }
+  .tm-table tr.highlight-art td {
+    color: #b71c1c;
+    border-top: 1.5px solid #b71c1c;
+    border-bottom: 1.5px solid #b71c1c;
+  }
+  .badge-art {
+    background: #b71c1c;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-size: calc(11px * var(--font-scale));
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
 
   @media print {
     .deck-stage { box-shadow: none; }
@@ -724,7 +805,7 @@
           <div><div class="kicker" style="margin-bottom:8px;">Solução</div><div style="font-family:var(--font-display);font-size:calc(30px * var(--font-scale));">+ aresta J02–J04</div></div>
         </div>
       </div>
-      <div class="pagenum">01 / 11</div>
+      <div class="pagenum">01 / 14</div>
     </section>
 
     <!-- ============================================================
@@ -772,7 +853,7 @@
           </div>
         </div>
       </div>
-      <div class="pagenum">02 / 11</div>
+      <div class="pagenum">02 / 14</div>
     </section>
 
     <!-- ============================================================
@@ -810,10 +891,16 @@
               <li>Arestas de retorno atualizam o low-link.</li>
               <li>Custo total: <strong>O(V + E)</strong> — linear e eficiente.</li>
             </ul>
+            <div class="card reveal d4" style="margin-top:20px; background:var(--paper-2); padding:16px 20px; border-left-width:4px;">
+              <div class="kicker" style="margin-bottom:4px; font-size:calc(11px * var(--font-scale));">Robert E. Tarjan (Prêmio Turing 1986)</div>
+              <p style="font-size:calc(14.5px * var(--font-scale)); line-height:1.4;">
+                Formulado em 1972 em conexão com a literatura de Robert Sedgewick. Reduz a identificação de articulações de um custo ingênuo O(V · (V + E)) para uma única passada linear em profundidade.
+              </p>
+            </div>
           </div>
         </div>
       </div>
-      <div class="pagenum">03 / 11</div>
+      <div class="pagenum">03 / 14</div>
     </section>
 
     <!-- ============================================================
@@ -876,7 +963,7 @@
           </div>
         </div>
       </div>
-      <div class="pagenum">04 / 11</div>
+      <div class="pagenum">04 / 14</div>
     </section>
 
     <!-- ============================================================
@@ -916,20 +1003,98 @@
           </div>
         </div>
       </div>
-      <div class="pagenum">05 / 11</div>
+      <div class="pagenum">05 / 14</div>
     </section>
 
     <!-- ============================================================
-         SLIDE 6 — CONTEXTO
+         SLIDE 6 — TESTE DE MESA FORMAL
          ============================================================ -->
     <section class="slide hairlines" data-slide="5">
+      <div class="frame" style="bottom:82px;">
+        <div class="topbar reveal">
+          <div>
+            <div class="kicker" style="margin-bottom:12px;">Rastreamento de variáveis · Exigência do trabalho</div>
+            <h2 style="font-size:calc(60px * var(--font-scale));">O teste de mesa <em>formal</em></h2>
+          </div>
+          <div class="lab">§ 06<span class="speaker">Nadson da Cruz Silva</span></div>
+        </div>
+        <div class="cols wide-left" style="flex:1; align-items:start; gap:40px;">
+          <div class="col reveal d2" style="display:flex; flex-direction:column; gap:12px;">
+            <div class="tm-table-wrap">
+              <table class="tm-table">
+                <thead>
+                  <tr>
+                    <th>Passo</th>
+                    <th>Ação / Evento</th>
+                    <th>u</th>
+                    <th>Pai</th>
+                    <th>desc[u]</th>
+                    <th>low[u]</th>
+                    <th>Condição Avaliada / Resultado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>1</td><td>Visitar raiz</td><td>J01</td><td>-</td><td>0</td><td>0</td><td>Entrada DFS (desc=0, low=0)</td></tr>
+                  <tr><td>2</td><td>Árvore J01→J02</td><td>J02</td><td>J01</td><td>1</td><td>1</td><td>Entrada DFS (desc=1, low=1)</td></tr>
+                  <tr><td>3</td><td>Árvore J02→J03</td><td>J03</td><td>J02</td><td>2</td><td>2</td><td>Entrada DFS (desc=2, low=2)</td></tr>
+                  <tr><td>4</td><td>Retorno J03→J01</td><td>J03</td><td>J02</td><td>2</td><td>0</td><td>low[J03] = min(2, desc[J01]=0) = 0</td></tr>
+                  <tr><td>5</td><td>Árvore J03→J04</td><td>J04</td><td>J03</td><td>3</td><td>3</td><td>Entrada DFS (desc=3, low=3)</td></tr>
+                  <tr><td>6</td><td>Árvore J04→J05</td><td>J05</td><td>J04</td><td>4</td><td>4</td><td>Entrada DFS (desc=4, low=4)</td></tr>
+                  <tr><td>7</td><td>Retorno J05→J03</td><td>J05</td><td>J04</td><td>4</td><td>2</td><td>low[J05] = min(4, desc[J03]=2) = 2</td></tr>
+                  <tr><td>8</td><td>Retorno DFS J05→J04</td><td>J04</td><td>J03</td><td>3</td><td>2</td><td>low[J04]=min(3, low[J05]=2)=2 | low[J05]≥desc[J04] (F)</td></tr>
+                  <tr class="highlight-art">
+                    <td>9</td>
+                    <td>Retorno DFS J04→J03</td>
+                    <td>J03</td>
+                    <td>J02</td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td>low[J04]=2 ≥ desc[J03]=2 → <span class="badge-art">J03 ARTICULAÇÃO!</span></td>
+                  </tr>
+                  <tr><td>10</td><td>Retorno J03→J05</td><td>J03</td><td>J02</td><td>2</td><td>0</td><td>low[J03] = min(0, desc[J05]=4) = 0</td></tr>
+                  <tr><td>11</td><td>Retorno DFS J03→J02</td><td>J02</td><td>J01</td><td>1</td><td>0</td><td>low[J02]=min(1, low[J03]=0)=0 | low[J03]≥desc[J02] (F)</td></tr>
+                  <tr><td>12</td><td>Retorno DFS J02→J01</td><td>J01</td><td>-</td><td>0</td><td>0</td><td>low[J01]=0 | Raiz J01 tem apenas 1 filho DFS (F)</td></tr>
+                  <tr><td>13</td><td>Retorno J01→J03</td><td>J01</td><td>-</td><td>0</td><td>0</td><td>Fim da DFS · 1 componente · Articulações: {J03}</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="col reveal d3" style="display:flex; flex-direction:column; gap:20px;">
+            <div class="card" style="border-left-width:5px;">
+              <div class="kicker" style="margin-bottom:6px;">O momento crucial (Passo 9)</div>
+              <h4 style="font-size:calc(20px * var(--font-scale)); margin-bottom:10px;">Por que J03 é articulação?</h4>
+              <p style="font-size:calc(17px * var(--font-scale)); line-height:1.5;">
+                Ao voltar do filho <strong>J04</strong> para <strong>J03</strong>, o algoritmo compara:
+                <br><br>
+                <code class="mono" style="font-size:calc(20px * var(--font-scale)); font-weight:700; color:var(--ink);">low[J04] (2) ≥ desc[J03] (2)</code>
+                <br><br>
+                Como a condição é verdadeira, o subgrafo <span class="mono">{J04, J05}</span> <strong>não tem aresta de volta</strong> para os ancestrais de J03 (J01 ou J02). J03 é, portanto, o único gargalo.
+              </p>
+            </div>
+            <div class="card" style="background:var(--paper-2);">
+              <div class="kicker" style="margin-bottom:6px;">Planilha Excel Entregue</div>
+              <h4 style="font-size:calc(18px * var(--font-scale));">teste_de_mesa_biconexo.xlsx</h4>
+              <p style="font-size:calc(15px * var(--font-scale)); line-height:1.45; margin-top:6px;">
+                Planilha oficial elaborada com as abas <strong>Grafo Original</strong> (13 passos) e <strong>Grafo Biconexo</strong> (15 passos), seguindo a estrutura padrão das salas virtuais de TPA.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pagenum">06 / 14</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 7 — CONTEXTO
+         ============================================================ -->
+    <section class="slide hairlines" data-slide="6">
       <div class="frame">
         <div class="topbar reveal">
           <div>
             <div class="kicker" style="margin-bottom:14px;">Aplicação prática</div>
             <h2>O clube de <em>jiu-jitsu</em></h2>
           </div>
-          <div class="lab">§ 06<span class="speaker">Nadson da Cruz Silva</span></div>
+          <div class="lab">§ 07<span class="speaker">Nadson da Cruz Silva</span></div>
         </div>
         <div class="cols wide-left" style="flex:1; align-items:center;">
           <div class="col">
@@ -948,20 +1113,63 @@
           <div class="col graph-box reveal d3" id="graphContext"></div>
         </div>
       </div>
-      <div class="pagenum">06 / 11</div>
+      <div class="pagenum">07 / 14</div>
     </section>
 
     <!-- ============================================================
-         SLIDE 7 — DIAGNÓSTICO
+         SLIDE 8 — MODELAGEM VISUAL: DO TATAME AO GRAFO
          ============================================================ -->
-    <section class="slide hairlines" data-slide="6">
+    <section class="slide hairlines" data-slide="7">
+      <div class="frame">
+        <div class="topbar reveal">
+          <div>
+            <div class="kicker" style="margin-bottom:12px;">Modelagem e representação prática</div>
+            <h2 style="font-size:calc(60px * var(--font-scale));">Do tatame à <em>teoria dos grafos</em></h2>
+          </div>
+          <div class="lab">§ 08<span class="speaker">Nadson · Transição para José Carlos</span></div>
+        </div>
+        <div class="cols" style="flex:1; align-items:stretch; gap:44px;">
+          <div class="col reveal d2">
+            <div class="img-frame">
+              <img src="img_jiu_jitsu_grafo.jpg" alt="Ilustração de praticantes de jiu-jitsu com sobreposição de rede de grafos">
+              <div class="img-caption">
+                <span>REDE SOCIAL DE TREINO</span>
+                <span>Vértices: Membros · Arestas: Treinos conjuntos</span>
+              </div>
+            </div>
+          </div>
+          <div class="col reveal d3" style="display:flex; flex-direction:column; justify-content:center; gap:22px;">
+            <p style="font-size:calc(24px * var(--font-scale)); line-height:1.45;">
+              No Jiu-Jitsu, posições e raspagens dependem de <strong>alavancas e conexões mecânicas</strong>. No clube, a transmissão de conhecimento segue a mesma lógica.
+            </p>
+            <ul class="fancy">
+              <li>
+                <strong>Duas turmas distintas:</strong> A turma matutina {J01, J02} e a turma noturna {J04, J05} treinam em horários desencontrados.
+              </li>
+              <li>
+                <strong>O membro integrador (J03):</strong> Atleta ou instrutor que frequenta ambos os turnos, tornando-se o elo exclusivo de difusão técnica.
+              </li>
+              <li>
+                <strong>A vulnerabilidade:</strong> Uma rede que depende de apenas um indivíduo para se manter unida corre sério risco de fragmentação.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="pagenum">08 / 14</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 9 — DIAGNÓSTICO
+         ============================================================ -->
+    <section class="slide hairlines" data-slide="8">
       <div class="frame">
         <div class="topbar reveal">
           <div>
             <div class="kicker" style="margin-bottom:14px;">Diagnóstico</div>
             <h2>J03 é o <em>ponto de dependência</em></h2>
           </div>
-          <div class="lab">§ 07<span class="speaker">José Carlos Ceccon</span></div>
+          <div class="lab">§ 09<span class="speaker">José Carlos Ceccon</span></div>
         </div>
         <div class="cols wide-right" style="flex:1; align-items:center;">
           <div class="col graph-box reveal d2" id="graphArticulation"></div>
@@ -982,20 +1190,20 @@ biconexo = <span class="c-key">False</span>
           </div>
         </div>
       </div>
-      <div class="pagenum">07 / 11</div>
+      <div class="pagenum">09 / 14</div>
     </section>
 
     <!-- ============================================================
-         SLIDE 8 — SIMULAÇÃO
+         SLIDE 10 — SIMULAÇÃO
          ============================================================ -->
-    <section class="slide hairlines" data-slide="7">
+    <section class="slide hairlines" data-slide="9">
       <div class="frame">
         <div class="topbar reveal">
           <div>
             <div class="kicker" style="margin-bottom:14px;">Simulação</div>
             <h2>Removendo <em>J03</em>…</h2>
           </div>
-          <div class="lab">§ 08<span class="speaker">José Carlos Ceccon</span></div>
+          <div class="lab">§ 10<span class="speaker">José Carlos Ceccon</span></div>
         </div>
         <div class="cols wide-left" style="flex:1; align-items:center;">
           <div class="col">
@@ -1014,20 +1222,20 @@ biconexo = <span class="c-key">False</span>
           <div class="col graph-box reveal d3" id="graphRemoval"></div>
         </div>
       </div>
-      <div class="pagenum">08 / 11</div>
+      <div class="pagenum">10 / 14</div>
     </section>
 
     <!-- ============================================================
-         SLIDE 9 — SOLUÇÃO
+         SLIDE 11 — SOLUÇÃO
          ============================================================ -->
-    <section class="slide hairlines" data-slide="8">
+    <section class="slide hairlines" data-slide="10">
       <div class="frame">
         <div class="topbar reveal">
           <div>
             <div class="kicker" style="margin-bottom:14px;">Solução</div>
             <h2>Rede <em>biconexa</em>: adicionar J02–J04</h2>
           </div>
-          <div class="lab">§ 09<span class="speaker">José Carlos Ceccon</span></div>
+          <div class="lab">§ 11<span class="speaker">José Carlos Ceccon</span></div>
         </div>
         <div class="cols wide-right" style="flex:1; align-items:center;">
           <div class="col graph-box reveal d2" id="graphSolution"></div>
@@ -1049,20 +1257,20 @@ biconexo = <span class="c-key">True</span>
           </div>
         </div>
       </div>
-      <div class="pagenum">09 / 11</div>
+      <div class="pagenum">11 / 14</div>
     </section>
 
     <!-- ============================================================
-         SLIDE 10 — COMPARAÇÃO
+         SLIDE 12 — COMPARAÇÃO
          ============================================================ -->
-    <section class="slide hairlines" data-slide="9">
+    <section class="slide hairlines" data-slide="11">
       <div class="frame">
         <div class="topbar reveal">
           <div>
             <div class="kicker" style="margin-bottom:14px;">Antes e depois</div>
             <h2>Comparação das <em>redes</em></h2>
           </div>
-          <div class="lab">§ 10<span class="speaker">José Carlos Ceccon</span></div>
+          <div class="lab">§ 12<span class="speaker">José Carlos Ceccon</span></div>
         </div>
         <div class="cmp reveal d2" style="flex:1; align-items:start;">
           <div class="cmp-card bad">
@@ -1086,14 +1294,94 @@ biconexo = <span class="c-key">True</span>
             </ul>
           </div>
         </div>
+        <div class="reveal d3" style="margin-top:24px;">
+          <div class="code-title" style="margin-bottom:8px;">Complexidade assintótica (padrão Sedgewick)</div>
+          <table class="tm-table" style="font-size:calc(15px * var(--font-scale)); background:var(--paper-2);">
+            <thead>
+              <tr>
+                <th>Algoritmo</th>
+                <th>Restrição</th>
+                <th>Caso Típico</th>
+                <th>Pior Caso</th>
+                <th>Espaço Extra</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="font-weight:700;">
+                <td style="color:var(--ink);">Tarjan (DFS + Low-Link)</td>
+                <td>Grafo não-dirigido conexo</td>
+                <td>V + E</td>
+                <td>V + E</td>
+                <td>V (pilha + vetores)</td>
+              </tr>
+              <tr style="opacity:0.75;">
+                <td>Força Bruta (remoção de vértices)</td>
+                <td>Testa V componentes via BFS</td>
+                <td>V · (V + E)</td>
+                <td>V · (V + E)</td>
+                <td>V</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div class="pagenum">10 / 11</div>
+      <div class="pagenum">12 / 14</div>
     </section>
 
     <!-- ============================================================
-         SLIDE 11 — CONCLUSÃO (colophon)
+         SLIDE 13 — APLICAÇÕES NO MUNDO REAL
          ============================================================ -->
-    <section class="slide hairlines" data-slide="10">
+    <section class="slide hairlines" data-slide="12">
+      <div class="frame">
+        <div class="topbar reveal">
+          <div>
+            <div class="kicker" style="margin-bottom:12px;">Além do tatame · Engenharia e Sistemas</div>
+            <h2 style="font-size:calc(60px * var(--font-scale));">Aplicações reais: <em>Redes resilientes</em></h2>
+          </div>
+          <div class="lab">§ 13<span class="speaker">José Carlos Ceccon</span></div>
+        </div>
+        <div class="cols" style="flex:1; align-items:stretch; gap:44px;">
+          <div class="col reveal d2">
+            <div class="img-frame">
+              <img src="img_redes_resilientes.jpg" alt="Ilustração de infraestrutura de rede resiliente e redundante com nós e caminhos duplos">
+              <div class="img-caption">
+                <span>TOPOLOGIA BICONEXA</span>
+                <span>Caminhos disjuntos = Tolerância a falhas sem SPOF</span>
+              </div>
+            </div>
+          </div>
+          <div class="col reveal d3" style="display:flex; flex-direction:column; justify-content:center; gap:16px;">
+            <p style="font-size:calc(22px * var(--font-scale)); line-height:1.4;">
+              O mesmo algoritmo de Tarjan em $O(V + E)$ é aplicado em infraestruturas críticas onde a interrupção não é uma opção:
+            </p>
+            <div class="cards c2" style="margin-top:8px;">
+              <div class="card">
+                <h4>Internet &amp; Roteamento</h4>
+                <p>Identifica roteadores que são <em>Single Points of Failure</em> (SPOF) em backbones BGP e topologias de data centers.</p>
+              </div>
+              <div class="card">
+                <h4>Redes Elétricas</h4>
+                <p>Subestações de transmissão elétrica precisam ser 2-conexas para evitar que a queda de uma torre cause apagão em cascata.</p>
+              </div>
+              <div class="card">
+                <h4>Logística &amp; Suprimentos</h4>
+                <p>Garante que o bloqueio de um porto ou rodovia principal não interrompa o abastecimento entre regiões produtivas.</p>
+              </div>
+              <div class="card">
+                <h4>E-mails no IFES (2022)</h4>
+                <p>Estudos acadêmicos aplicam decomposição biconexa para mapear gargalos de comunicação interpessoal em instituições.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pagenum">13 / 14</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 14 — CONCLUSÃO (colophon)
+         ============================================================ -->
+    <section class="slide hairlines" data-slide="13">
       <div class="glitch left">
         <svg width="100%" height="100%" viewBox="0 0 300 1000" preserveAspectRatio="none" aria-hidden="true">
           <defs>
@@ -1110,7 +1398,7 @@ biconexo = <span class="c-key">True</span>
       </div>
       <div class="frame" style="left:260px;">
         <div class="kicker reveal">Conclusão</div>
-        <div class="lab reveal" style="margin-top:14px;">§ 11<span class="speaker">José Carlos Ceccon</span></div>
+        <div class="lab reveal" style="margin-top:14px;">§ 14<span class="speaker">José Carlos Ceccon &amp; Nadson da Cruz Silva</span></div>
         <h2 class="reveal d1" style="font-size:calc(96px * var(--font-scale)); line-height:0.96; margin-top:20px;">Grafos biconexos tornam a <em>rede mais forte</em></h2>
         <div class="cards c3 reveal d2" style="margin-top:40px;">
           <div class="card"><div class="num">1</div><h4>Algoritmo eficiente</h4><p>Uma DFS com low-link encontra articulações em O(V + E).</p></div>
@@ -1136,7 +1424,7 @@ biconexo = <span class="c-key">True</span>
           </div>
         </div>
       </div>
-      <div class="pagenum">11 / 11</div>
+      <div class="pagenum">14 / 14</div>
     </section>
 
   </main>
@@ -1152,7 +1440,7 @@ biconexo = <span class="c-key">True</span>
     <button class="font-btn" id="fontDown" aria-label="Diminuir fonte" title="Diminuir fonte">A⁻</button>
     <span class="font-label" id="fontLabel">100%</span>
     <button class="font-btn" id="fontUp" aria-label="Aumentar fonte" title="Aumentar fonte">A⁺</button>
-    <span class="page-indicator" id="pageIndicator">01 / 11</span>
+    <span class="page-indicator" id="pageIndicator">01 / 14</span>
     <button class="nav-btn" id="navPrev" aria-label="Anterior">‹</button>
     <button class="nav-btn" id="navNext" aria-label="Próximo">›</button>
   </div>
