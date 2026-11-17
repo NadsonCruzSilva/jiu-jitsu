@@ -6,3 +6,7 @@ __pycache__/
 *.log
 .DS_Store
 Thumbs.db
+.chrome-render*/
+.edge-render*/
+capa-verificacao.png
+
