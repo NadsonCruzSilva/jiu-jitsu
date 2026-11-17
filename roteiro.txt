@@ -56,12 +56,17 @@ Em termos práticos e topológicos, isso implica duas propriedades cruciais:
 
 Portanto, um grafo biconexo é sinônimo de resiliência e redundância estrutural.
 
-No nosso vocabulário de modelagem:
-- Vértices V representam os praticantes (alunos e professores J01 a J05).
-- Arestas E representam os treinos realizados em conjunto (duplas com pelo menos
-  3 treinos no mês).
-- Articulação é o atleta crítico: se ele faltar ou trocar de academia, turmas
-  inteiras perdem o vínculo de treino entre si.
+No nosso vocabulário de modelagem (abaixo à esquerda):
+- Vértices V representam os praticantes (alunos e professores).
+- Arestas E representam os treinos realizados em conjunto.
+- Articulação é o atleta crítico cuja ausência partiria o grupo.
+
+À direita, trouxemos um exemplo interativo e animado de Grafo Biconexo (V1 a V5):
+- Observem na animação que entre V1 e V5 existem dois caminhos completamente
+  independentes: a rota superior (V1→V2→V4→V5) e a rota inferior (V1→V3→V5).
+- Quando simulamos a queda de V3, V2 ou V4 (ou clicamos diretamente sobre qualquer
+  nó do grafo), o fluxo de pacotes se redireciona automaticamente pela rota
+  alternativa e o grafo jamais se desconecta — mantendo sempre 1 única componente!
 
 ------------------------------------------------------------------------------
 SLIDE 03 — TARJAN: DFS + LOW-LINK  (Nadson — ~1m30s)

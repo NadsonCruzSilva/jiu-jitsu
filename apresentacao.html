@@ -653,6 +653,96 @@
   }
   .slide[data-slide="0"] .frame > div:last-child > div > div:last-child { font-size: calc(34px * var(--font-scale)) !important; }
 
+  /* Composição da capa: kimono branco, faixa preta e patch institucional. */
+  .slide[data-slide="0"] .frame {
+    right: auto;
+    width: 1060px;
+    max-width: none;
+    z-index: 3;
+  }
+  .slide[data-slide="0"] h2 {
+    font-size: calc(116px * var(--font-scale)) !important;
+    max-width: 1010px !important;
+  }
+  .slide[data-slide="0"] .frame > p {
+    max-width: 900px !important;
+    font-size: calc(25px * var(--font-scale)) !important;
+  }
+  .slide[data-slide="0"] .frame > div:last-child {
+    gap: 46px !important;
+  }
+  .slide[data-slide="0"] .frame > div:last-child > div > div:last-child {
+    font-size: calc(25px * var(--font-scale)) !important;
+  }
+  .cover-gi {
+    position: absolute;
+    z-index: 2;
+    right: 42px;
+    top: 66px;
+    width: 790px;
+    height: 930px;
+    pointer-events: none;
+    filter: drop-shadow(0 22px 22px rgba(17, 32, 23, .16));
+  }
+  .cover-gi::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 95px 35px 70px 90px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(150, 193, 31, .15), rgba(35, 148, 56, .06) 48%, transparent 72%);
+  }
+  .cover-gi > img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .gi-patch {
+    position: absolute;
+    left: 57%;
+    top: 30%;
+    width: 142px;
+    height: 92px;
+    transform: rotate(2deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 4px solid var(--ifes-green-dark);
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 4px 9px rgba(0,0,0,.16);
+    font-family: Arial, sans-serif;
+    color: var(--ifes-green-dark);
+  }
+  .gi-patch-symbol {
+    width: 44px;
+    height: 58px;
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 11px);
+    grid-template-rows: repeat(4, 11px);
+    gap: 3px;
+  }
+  .gi-patch-symbol i { display: block; background: var(--ifes-green); border-radius: 1px; }
+  .gi-patch-symbol i:nth-child(1) { grid-column: 1; grid-row: 1; background: var(--ifes-red); border-radius: 50%; }
+  .gi-patch-symbol i:nth-child(2) { grid-column: 2; grid-row: 1; }
+  .gi-patch-symbol i:nth-child(3) { grid-column: 3; grid-row: 1; }
+  .gi-patch-symbol i:nth-child(4) { grid-column: 1; grid-row: 2; }
+  .gi-patch-symbol i:nth-child(5) { grid-column: 2; grid-row: 2; }
+  .gi-patch-symbol i:nth-child(6) { grid-column: 1; grid-row: 3; }
+  .gi-patch-symbol i:nth-child(7) { grid-column: 2; grid-row: 3; }
+  .gi-patch-symbol i:nth-child(8) { grid-column: 3; grid-row: 3; }
+  .gi-patch-symbol i:nth-child(9) { grid-column: 1; grid-row: 4; }
+  .gi-patch-symbol i:nth-child(10) { grid-column: 2; grid-row: 4; }
+  .gi-patch-word {
+    font-size: 25px;
+    font-weight: 800;
+    letter-spacing: .04em;
+  }
+
   /* Slides com maior densidade recebem escala própria para evitar cortes. */
   .slide[data-slide="3"] .frame { top: 58px; }
   .slide[data-slide="3"] .topbar h2 { font-size: calc(72px * var(--font-scale)); }
@@ -747,6 +837,155 @@
     letter-spacing: 0.05em;
   }
 
+  /* ============================================================
+     SLIDE 2 — EXEMPLO ANIMADO DE GRAFO BICONEXO
+     ============================================================ */
+  .bic-demo-card {
+    border: 1.5px solid rgba(35, 148, 56, 0.28);
+    border-radius: 16px;
+    background: rgba(247, 249, 246, 0.95);
+    box-shadow: 0 14px 34px rgba(31, 77, 43, 0.08);
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .bic-demo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid rgba(35, 148, 56, 0.16);
+    padding-bottom: 10px;
+  }
+  .bic-demo-title {
+    font-family: var(--font-mono);
+    font-size: calc(13px * var(--font-scale));
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ifes-green-dark);
+    font-weight: 700;
+  }
+  .bic-status-pill {
+    font-family: var(--font-mono);
+    font-size: calc(12.5px * var(--font-scale));
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: rgba(35, 148, 56, 0.14);
+    color: var(--ifes-green-dark);
+    border: 1px solid rgba(35, 148, 56, 0.35);
+  }
+  .bic-svg-wrap {
+    width: 100%;
+    height: 330px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .bic-svg-wrap svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .bic-edge {
+    stroke: rgba(35, 148, 56, 0.24);
+    stroke-width: 5;
+    stroke-linecap: round;
+    transition: stroke 0.35s, stroke-width 0.35s, opacity 0.35s;
+  }
+  .bic-edge.path-a {
+    stroke: var(--ifes-green);
+    stroke-width: 8;
+  }
+  .bic-edge.path-b {
+    stroke: #1F2BE0;
+    stroke-width: 8;
+    stroke-dasharray: 14 9;
+  }
+  .bic-edge.dim {
+    stroke: rgba(41, 50, 46, 0.12);
+    stroke-dasharray: 6 8;
+    opacity: 0.45;
+  }
+  .bic-node {
+    cursor: pointer;
+  }
+  .bic-node circle.main-circle {
+    fill: white;
+    stroke: var(--ifes-green);
+    stroke-width: 4;
+    transition: fill 0.3s, stroke 0.3s, opacity 0.3s;
+  }
+  .bic-node:hover circle.main-circle {
+    stroke-width: 6;
+  }
+  .bic-node text {
+    fill: var(--ifes-green-dark);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: calc(26px * var(--font-scale));
+    text-anchor: middle;
+    dominant-baseline: central;
+    pointer-events: none;
+  }
+  .bic-node.active-a circle.main-circle {
+    fill: rgba(150, 193, 31, 0.22);
+    stroke: var(--ifes-green);
+    stroke-width: 5.5;
+  }
+  .bic-node.active-b circle.main-circle {
+    fill: rgba(31, 43, 224, 0.14);
+    stroke: #1F2BE0;
+    stroke-width: 5.5;
+  }
+  .bic-node.removed {
+    opacity: 0.32;
+  }
+  .bic-node.removed circle.main-circle {
+    fill: rgba(207, 10, 22, 0.08);
+    stroke: var(--ifes-red);
+    stroke-dasharray: 7 6;
+  }
+  .bic-node.removed text {
+    fill: var(--ifes-red);
+  }
+  .bic-explain {
+    background: white;
+    border: 1px solid rgba(35, 148, 56, 0.22);
+    border-left: 5px solid var(--ifes-green);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: calc(17px * var(--font-scale));
+    line-height: 1.4;
+    color: var(--ink);
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+  }
+  .bic-mini-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .bic-mini-cards .card {
+    padding: 16px 18px;
+  }
+  .bic-mini-cards .card .num {
+    font-size: calc(34px * var(--font-scale));
+    margin-bottom: 6px;
+  }
+  .bic-mini-cards .card h4 {
+    font-size: calc(15px * var(--font-scale));
+    margin-bottom: 4px;
+  }
+  .bic-mini-cards .card p {
+    font-size: calc(14px * var(--font-scale));
+    line-height: 1.35;
+  }
+
   @media print {
     .deck-stage { box-shadow: none; }
     .ifes-lockup { display: flex !important; }
@@ -776,6 +1015,15 @@
         </svg>
       </div>
       <div class="qr" aria-hidden="true" id="qrCover"></div>
+      <div class="cover-gi reveal d2" aria-label="Kimono branco de jiu-jitsu com faixa preta e patch do IFES">
+        <img src="kimono-faixa-preta.png" alt="Kimono branco de jiu-jitsu com faixa preta">
+        <div class="gi-patch" aria-label="Patch do IFES">
+          <span class="gi-patch-symbol" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </span>
+          <span class="gi-patch-word">IFES</span>
+        </div>
+      </div>
       <div class="frame">
         <div class="kicker reveal">Técnicas de Programação Avançada · Grafos</div>
         <h2 class="reveal d1" style="font-size:calc(176px * var(--font-scale)); line-height:0.9; max-width:1300px; margin-top:26px;">
@@ -809,7 +1057,7 @@
     </section>
 
     <!-- ============================================================
-         SLIDE 2 — CONCEITO
+         SLIDE 2 — CONCEITO (COM GRAFO BICONEXO ANIMADO)
          ============================================================ -->
     <section class="slide hairlines" data-slide="1">
       <div class="frame">
@@ -820,34 +1068,52 @@
           </div>
           <div class="lab">§ 02<span class="speaker">Nadson da Cruz Silva</span></div>
         </div>
-        <div class="cols wide-left" style="flex:1; align-items:start;">
+        <div class="cols wide-left" style="flex:1; align-items:center; gap:38px;">
           <div class="col">
-            <p class="reveal d2" style="margin-bottom:26px; font-size:calc(26px * var(--font-scale));">
+            <p class="reveal d2" style="margin-bottom:18px; font-size:calc(24px * var(--font-scale)) !important;">
               Um grafo conexo é <strong>biconexo</strong> (ou 2-conexo) quando continua conexo
               após a remoção de <strong>qualquer</strong> vértice.
             </p>
             <ul class="fancy reveal d3">
-              <li>Não possui <strong>pontos de articulação</strong> — vértices cuja remoção desconecta o grafo.</li>
-              <li>Todo par de vértices possui ao menos <strong>dois caminhos distintos</strong> entre si.</li>
-              <li>É <strong>resiliente</strong>: nenhum único vértice é ponto crítico da rede.</li>
+              <li style="font-size:calc(21px * var(--font-scale));">Não possui <strong>pontos de articulação</strong> — vértices cuja remoção desconecta o grafo.</li>
+              <li style="font-size:calc(21px * var(--font-scale));">Todo par de vértices possui ao menos <strong>dois caminhos disjuntos</strong> entre si.</li>
+              <li style="font-size:calc(21px * var(--font-scale));">É <strong>resiliente</strong>: se um nó falhar, o fluxo desvia automaticamente por outra rota.</li>
             </ul>
-          </div>
-          <div class="col">
-            <div class="cards c2 reveal d2">
+            <div class="bic-mini-cards reveal d4">
               <div class="card">
                 <div class="num">V</div>
                 <h4>Vértices</h4>
-                <p>Os nós da rede. No nosso caso, membros do clube.</p>
+                <p>Nós da rede (membros do clube).</p>
               </div>
               <div class="card">
                 <div class="num">E</div>
                 <h4>Arestas</h4>
-                <p>Conexões entre vértices. Aqui, treinos em comum.</p>
+                <p>Conexões (treinos em comum).</p>
               </div>
-              <div class="card" style="grid-column: span 2;">
+              <div class="card">
                 <div class="num">✕</div>
                 <h4>Articulação</h4>
-                <p>Vértice cuja remoção aumenta o número de componentes conexas. O alvo da nossa análise.</p>
+                <p>Nó crítico que partiria o grafo.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col reveal d2">
+            <div class="bic-demo-card" id="bicDemoWrap">
+              <div class="bic-demo-header">
+                <span class="bic-demo-title">Grafo Biconexo de Exemplo (Clique num nó ou simule)</span>
+                <span class="bic-status-pill" id="bicStatusPill">✓ 0 Articulações · 1 Componente</span>
+              </div>
+              <div class="bic-svg-wrap" id="bicExampleGraph"></div>
+              <div class="bic-explain" id="bicExplainBox">
+                Entre <strong>V1</strong> e <strong>V5</strong> existem <strong>2 caminhos disjuntos</strong>: rota superior (<span class="mono">V1→V2→V4→V5</span>) e rota inferior (<span class="mono">V1→V3→V5</span>).
+              </div>
+              <div class="controls" style="justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                  <button class="btn primary" id="btnBicAuto">⏸ Pausar Demo</button>
+                  <button class="btn" id="btnBicPaths">⇄ 2 Caminhos</button>
+                  <button class="btn" id="btnBicFail">✕ Testar Queda de Nó</button>
+                </div>
+                <button class="btn" id="btnBicReset">↺ Restaurar</button>
               </div>
             </div>
           </div>
@@ -1636,7 +1902,7 @@ biconexo = <span class="c-key">True</span>
   navPrev.addEventListener("click", () => goTo(current - 1));
   navNext.addEventListener("click", () => goTo(current + 1));
   document.addEventListener("keydown", (e) => {
-    if (e.target && e.target.closest && e.target.closest(".anim-side")) return;
+    if (e.target && e.target.closest && e.target.closest(".anim-side, .bic-demo-card")) return;
     if (e.target && e.target.getAttribute && e.target.getAttribute("contenteditable") === "true") return;
     if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); goTo(current + 1); }
     else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); goTo(current - 1); }
@@ -1666,6 +1932,307 @@ biconexo = <span class="c-key">True</span>
         syncHud(target);
       }
     }
+  })();
+
+  /* =========================================================
+     4B. SLIDE 2 — EXEMPLO ANIMADO DE GRAFO BICONEXO
+     ========================================================= */
+  (function () {
+    const container = document.getElementById("bicExampleGraph");
+    if (!container) return;
+
+    const BIC_VERTICES = ["V1", "V2", "V3", "V4", "V5"];
+    const BIC_POS = {
+      V1: { x: 95,  y: 165 },
+      V2: { x: 310, y: 55  },
+      V3: { x: 310, y: 275 },
+      V4: { x: 545, y: 75  },
+      V5: { x: 645, y: 215 },
+    };
+    const BIC_EDGES = [
+      ["V1", "V2"], ["V1", "V3"], ["V2", "V3"],
+      ["V2", "V4"], ["V3", "V4"], ["V3", "V5"], ["V4", "V5"],
+    ];
+
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("viewBox", "0 0 740 330");
+    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+    const edgeLayer = document.createElementNS(SVG_NS, "g");
+    const packetLayer = document.createElementNS(SVG_NS, "g");
+    const nodeLayer = document.createElementNS(SVG_NS, "g");
+    svg.appendChild(edgeLayer);
+    svg.appendChild(packetLayer);
+    svg.appendChild(nodeLayer);
+
+    const bicEdges = {};
+    BIC_EDGES.forEach(([a, b]) => {
+      const line = document.createElementNS(SVG_NS, "line");
+      line.setAttribute("x1", BIC_POS[a].x);
+      line.setAttribute("y1", BIC_POS[a].y);
+      line.setAttribute("x2", BIC_POS[b].x);
+      line.setAttribute("y2", BIC_POS[b].y);
+      line.setAttribute("class", "bic-edge");
+      edgeLayer.appendChild(line);
+      bicEdges[edgeKey(a, b)] = line;
+    });
+
+    function createPacket(color) {
+      const g = document.createElementNS(SVG_NS, "g");
+      g.style.opacity = "0";
+      const glow = document.createElementNS(SVG_NS, "circle");
+      glow.setAttribute("r", "15");
+      glow.setAttribute("fill", color);
+      glow.setAttribute("opacity", "0.28");
+      const core = document.createElementNS(SVG_NS, "circle");
+      core.setAttribute("r", "8");
+      core.setAttribute("fill", color);
+      core.setAttribute("stroke", "#ffffff");
+      core.setAttribute("stroke-width", "2.5");
+      g.appendChild(glow);
+      g.appendChild(core);
+      packetLayer.appendChild(g);
+      return g;
+    }
+
+    const packetA = createPacket("#239438");
+    const packetB = createPacket("#1F2BE0");
+
+    const bicNodes = {};
+    BIC_VERTICES.forEach((v) => {
+      const g = document.createElementNS(SVG_NS, "g");
+      g.setAttribute("class", "bic-node");
+      g.setAttribute("transform", `translate(${BIC_POS[v].x},${BIC_POS[v].y})`);
+      const c = document.createElementNS(SVG_NS, "circle");
+      c.setAttribute("class", "main-circle");
+      c.setAttribute("r", "36");
+      const t = document.createElementNS(SVG_NS, "text");
+      t.textContent = v;
+      g.appendChild(c);
+      g.appendChild(t);
+      g.addEventListener("click", () => {
+        stopBicAuto();
+        if (currentRemoved === v) {
+          showDisjointPaths();
+        } else {
+          simulateNodeRemoval(v);
+        }
+      });
+      nodeLayer.appendChild(g);
+      bicNodes[v] = g;
+    });
+
+    container.appendChild(svg);
+
+    const statusPill = document.getElementById("bicStatusPill");
+    const explainBox = document.getElementById("bicExplainBox");
+    const btnAuto = document.getElementById("btnBicAuto");
+    const btnPaths = document.getElementById("btnBicPaths");
+    const btnFail = document.getElementById("btnBicFail");
+    const btnReset = document.getElementById("btnBicReset");
+
+    let tlA = null;
+    let tlB = null;
+    let bicAutoTimer = null;
+    let currentRemoved = null;
+    let failCycleIdx = 0;
+    const FAIL_ORDER = ["V3", "V2", "V4", "V1", "V5"];
+
+    function killPacketTimelines() {
+      if (tlA) { tlA.kill(); tlA = null; }
+      if (tlB) { tlB.kill(); tlB = null; }
+      gsap.set([packetA, packetB], { opacity: 0 });
+    }
+
+    function animatePacketAlong(packet, nodeSeq, delay) {
+      if (!nodeSeq || nodeSeq.length < 2) return null;
+      const start = BIC_POS[nodeSeq[0]];
+      gsap.set(packet, { attr: { transform: `translate(${start.x},${start.y})` }, opacity: 1 });
+      const tl = gsap.timeline({ repeat: -1, delay: delay || 0 });
+      for (let i = 1; i < nodeSeq.length; i++) {
+        const prev = BIC_POS[nodeSeq[i - 1]];
+        const next = BIC_POS[nodeSeq[i]];
+        const proxy = { x: prev.x, y: prev.y };
+        tl.to(proxy, {
+          x: next.x,
+          y: next.y,
+          duration: 0.72,
+          ease: "power1.inOut",
+          onUpdate: function () {
+            packet.setAttribute("transform", `translate(${proxy.x},${proxy.y})`);
+          }
+        });
+      }
+      tl.to(packet, { opacity: 0, duration: 0.22 });
+      tl.to({}, { duration: 0.2 });
+      return tl;
+    }
+
+    function clearGraphClasses() {
+      BIC_VERTICES.forEach((v) => {
+        bicNodes[v].classList.remove("active-a", "active-b", "removed");
+      });
+      BIC_EDGES.forEach(([a, b]) => {
+        bicEdges[edgeKey(a, b)].classList.remove("path-a", "path-b", "dim");
+      });
+    }
+
+    function highlightPathEdges(seq, cls) {
+      for (let i = 0; i < seq.length - 1; i++) {
+        const el = bicEdges[edgeKey(seq[i], seq[i + 1])];
+        if (el) el.classList.add(cls);
+      }
+    }
+
+    function showDisjointPaths() {
+      currentRemoved = null;
+      killPacketTimelines();
+      clearGraphClasses();
+
+      const path1 = ["V1", "V2", "V4", "V5"];
+      const path2 = ["V1", "V3", "V5"];
+      highlightPathEdges(path1, "path-a");
+      highlightPathEdges(path2, "path-b");
+
+      ["V1", "V2", "V4", "V5"].forEach((v) => bicNodes[v].classList.add("active-a"));
+      bicNodes["V3"].classList.add("active-b");
+
+      tlA = animatePacketAlong(packetA, path1, 0);
+      tlB = animatePacketAlong(packetB, path2, 0.35);
+
+      statusPill.textContent = "✓ 2 Caminhos Disjuntos (V1 ↔ V5)";
+      statusPill.style.background = "rgba(35, 148, 56, 0.14)";
+      statusPill.style.color = "var(--ifes-green-dark)";
+      explainBox.innerHTML =
+        '<div>Entre <strong>V1</strong> e <strong>V5</strong> há <strong>2 rotas independentes</strong>: ' +
+        'Caminho 1 (<span class="mono" style="color:var(--ifes-green-dark);font-weight:700;">V1→V2→V4→V5</span>) e ' +
+        'Caminho 2 (<span class="mono" style="color:#1F2BE0;font-weight:700;">V1→V3→V5</span>). Nenhum nó é único!</div>';
+    }
+
+    const REMOVAL_CONFIG = {
+      V3: {
+        path: ["V1", "V2", "V4", "V5"],
+        extraEdges: [],
+        msg: 'Removendo <strong>V3</strong>: o grafo <strong>continua conexo (1 componente)</strong>! O tráfego entre V1 e V5 flui normalmente pela rota superior <span class="mono">V1 → V2 → V4 → V5</span>.'
+      },
+      V2: {
+        path: ["V1", "V3", "V4", "V5"],
+        extraEdges: [["V3", "V5"]],
+        msg: 'Removendo <strong>V2</strong>: <strong>nenhum vértice fica isolado</strong>! O fluxo desvia por baixo via <span class="mono">V1 → V3 → V4 → V5</span>, mantendo todos conectados.'
+      },
+      V4: {
+        path: ["V1", "V2", "V3", "V5"],
+        extraEdges: [["V1", "V3"]],
+        msg: 'Removendo <strong>V4</strong>: a ligação interna <span class="mono">V2—V3</span> garante o desvio por <span class="mono">V1 → V2 → V3 → V5</span>. <strong>Zero articulações!</strong>'
+      },
+      V1: {
+        path: ["V2", "V3", "V5", "V4"],
+        extraEdges: [["V2", "V4"], ["V3", "V4"]],
+        msg: 'Removendo <strong>V1</strong>: os 4 vértices restantes <span class="mono">{V2, V3, V4, V5}</span> permanecem 100% interligados em ciclo.'
+      },
+      V5: {
+        path: ["V1", "V2", "V4", "V3"],
+        extraEdges: [["V1", "V3"], ["V2", "V3"]],
+        msg: 'Removendo <strong>V5</strong>: os vértices restantes <span class="mono">{V1, V2, V3, V4}</span> continuam formando uma única componente conexa.'
+      }
+    };
+
+    function simulateNodeRemoval(vRemove) {
+      currentRemoved = vRemove;
+      killPacketTimelines();
+      clearGraphClasses();
+
+      const cfg = REMOVAL_CONFIG[vRemove] || REMOVAL_CONFIG.V3;
+
+      BIC_VERTICES.forEach((v) => {
+        if (v === vRemove) {
+          bicNodes[v].classList.add("removed");
+          gsap.fromTo(bicNodes[v], { scale: 1 }, { scale: 0.88, duration: 0.35, ease: "back.out(1.7)" });
+        } else {
+          bicNodes[v].classList.add("active-a");
+          gsap.to(bicNodes[v], { scale: 1, duration: 0.25 });
+        }
+      });
+
+      BIC_EDGES.forEach(([a, b]) => {
+        const el = bicEdges[edgeKey(a, b)];
+        if (a === vRemove || b === vRemove) {
+          el.classList.add("dim");
+        }
+      });
+
+      highlightPathEdges(cfg.path, "path-a");
+      (cfg.extraEdges || []).forEach(([a, b]) => {
+        const el = bicEdges[edgeKey(a, b)];
+        if (el) el.classList.add("path-a");
+      });
+
+      tlA = animatePacketAlong(packetA, cfg.path, 0);
+
+      statusPill.textContent = `✕ Sem ${vRemove} → Continua 1 Componente!`;
+      statusPill.style.background = "rgba(150, 193, 31, 0.22)";
+      statusPill.style.color = "var(--ifes-green-dark)";
+      explainBox.innerHTML = `<div>${cfg.msg}</div>`;
+    }
+
+    const AUTO_STATES = [
+      () => showDisjointPaths(),
+      () => simulateNodeRemoval("V3"),
+      () => simulateNodeRemoval("V2"),
+      () => simulateNodeRemoval("V4"),
+    ];
+    let autoStateIdx = 0;
+
+    function startBicAuto() {
+      if (bicAutoTimer) return;
+      btnAuto.textContent = "⏸ Pausar Demo";
+      btnAuto.classList.add("primary");
+      bicAutoTimer = setInterval(() => {
+        autoStateIdx = (autoStateIdx + 1) % AUTO_STATES.length;
+        AUTO_STATES[autoStateIdx]();
+      }, 3200);
+    }
+
+    function stopBicAuto() {
+      if (bicAutoTimer) {
+        clearInterval(bicAutoTimer);
+        bicAutoTimer = null;
+      }
+      btnAuto.textContent = "▶ Auto-Simular";
+      btnAuto.classList.remove("primary");
+    }
+
+    btnAuto.addEventListener("click", () => {
+      if (bicAutoTimer) stopBicAuto();
+      else {
+        autoStateIdx = (autoStateIdx + 1) % AUTO_STATES.length;
+        AUTO_STATES[autoStateIdx]();
+        startBicAuto();
+      }
+    });
+
+    btnPaths.addEventListener("click", () => {
+      stopBicAuto();
+      showDisjointPaths();
+    });
+
+    btnFail.addEventListener("click", () => {
+      stopBicAuto();
+      const targetV = FAIL_ORDER[failCycleIdx % FAIL_ORDER.length];
+      failCycleIdx++;
+      simulateNodeRemoval(targetV);
+    });
+
+    btnReset.addEventListener("click", () => {
+      stopBicAuto();
+      failCycleIdx = 0;
+      autoStateIdx = 0;
+      BIC_VERTICES.forEach((v) => gsap.to(bicNodes[v], { scale: 1, duration: 0.25 }));
+      showDisjointPaths();
+    });
+
+    showDisjointPaths();
+    startBicAuto();
   })();
 
   /* =========================================================
