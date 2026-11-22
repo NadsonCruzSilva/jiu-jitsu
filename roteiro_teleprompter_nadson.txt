@@ -1,0 +1,157 @@
+ROTEIRO DE TELEPROMPTER — NADSON
+Grafos biconexos no jiu-jitsu | Slides 1 a 8
+Duração estimada: 8 a 10 minutos, conforme o ritmo da demonstração.
+
+LEGENDA: [PAUSA] = pausa breve; [AVANÇAR] = próximo slide;
+[AÇÃO] = comando na apresentação; [APONTAR] = mostrar o elemento citado.
+As indicações entre colchetes não são faladas.
+
+
+SLIDE 1 — CAPA
+
+Bom dia, professor Rafael e colegas.
+
+Eu sou o Nadson e, junto com o José Carlos, vou apresentar nosso trabalho sobre grafos biconexos no jiu-jitsu.
+
+A pergunta que orienta o projeto é simples: se uma pessoa deixar de frequentar os treinos, as turmas da academia continuam conectadas?
+
+Para responder, representamos os praticantes como vértices e os treinos em conjunto como arestas. Depois, usamos uma busca em profundidade para identificar pessoas cuja ausência dividiria a rede. Essas pessoas são os pontos de articulação.
+
+Eu vou explicar o conceito, o algoritmo e o teste de mesa. Em seguida, José Carlos vai mostrar o diagnóstico, a simulação da ausência de um praticante e a solução proposta.
+
+[AVANÇAR]
+
+
+SLIDE 2 — O QUE É UM GRAFO BICONEXO?
+
+Primeiro, o conceito central.
+
+Um grafo é biconexo quando continua conectado mesmo que a gente remova qualquer um dos seus vértices. Em outras palavras, ele não depende de um único nó para manter todos os demais unidos.
+
+Se a remoção de um vértice separa o grafo em partes, esse vértice é um ponto de articulação.
+
+[APONTAR PARA OS CARTÕES]
+
+Na nossa aplicação, os vértices são os membros da academia; as arestas são os treinos realizados em conjunto; e a articulação é o membro que conecta grupos que, sem ele, ficariam separados.
+
+[APONTAR PARA O GRAFO À DIREITA]
+
+Este exemplo é biconexo. Entre V1 e V5, por exemplo, podemos seguir pela parte de cima ou pela parte de baixo. São caminhos que não dependem dos mesmos vértices intermediários.
+
+[AÇÃO: CLICAR EM “⇄ 2 Caminhos”; DEPOIS, EM “✕ Testar Queda de Nó”.]
+
+Mesmo quando um desses nós sai, os vértices restantes continuam conectados. É essa capacidade de manter a conexão que queremos verificar no caso da academia.
+
+[AVANÇAR]
+
+
+SLIDE 3 — TARJAN: DFS E LOW-LINK
+
+Como encontramos esses pontos de articulação sem remover cada pessoa e testar o grafo inteiro de novo?
+
+Usamos o algoritmo de Tarjan, com uma busca em profundidade, chamada DFS.
+
+Durante a busca, cada vértice recebe dois valores. O primeiro é “desc”, o momento em que ele foi encontrado. O segundo é “low”, o menor tempo de descoberta ao qual ele, ou seus descendentes na busca, conseguem voltar usando as conexões do grafo.
+
+[APONTAR PARA A EXPRESSÃO low[v] ≥ desc[u]]
+
+Esta comparação é o coração do algoritmo. Se um filho V não consegue chegar a nenhum vértice descoberto antes do seu pai U, então a subárvore desse filho depende de U para se conectar ao restante da rede. Nesse caso, U é uma articulação.
+
+A raiz da busca tem uma regra própria: ela só é articulação quando tem mais de um filho na árvore da DFS.
+
+Como a busca percorre os vértices e as arestas uma vez, o custo é linear: O de V mais E. Aqui, V é o número de vértices e E é o número de arestas.
+
+[AVANÇAR]
+
+
+SLIDE 4 — O CÓDIGO
+
+Agora dá para ver como essa ideia aparece no nosso código em Python.
+
+[APONTAR PARA O BLOCO DA ESQUERDA]
+
+Ao entrar em um vértice, o programa atribui o tempo atual a “descoberta” e a “low”. Depois, percorre seus vizinhos.
+
+Quando encontra um vizinho ainda não visitado, a DFS desce até ele. Na volta, o pai recebe o menor valor de low encontrado pelo filho. É nessa volta que testamos se o low do filho é maior ou igual ao tempo de descoberta do pai.
+
+Se o vizinho já foi visitado e não é o pai imediato, encontramos uma aresta de retorno. Ela pode oferecer um caminho alternativo para um vértice anterior e diminuir o valor de low.
+
+[APONTAR PARA O BLOCO DA DIREITA]
+
+Por fim, o programa usa essas informações para dizer se o grafo é biconexo. Também temos uma função que simula a remoção de um membro e conta quantos grupos conectados restam. Assim, podemos conferir o resultado na prática.
+
+[AVANÇAR]
+
+
+SLIDE 5 — A DFS EM AÇÃO
+
+Vamos acompanhar a busca no nosso grafo original.
+
+[AÇÃO: CLICAR EM “↺ Reset”, SE NECESSÁRIO; AVANÇAR COM “Próximo →” ENQUANTO FALA.]
+
+Começamos em J01, com tempo zero. A busca segue para J02, com tempo um, e depois para J03, com tempo dois.
+
+[AÇÃO: AVANÇAR ATÉ A ARESTA DE RETORNO J03 → J01.]
+
+Aqui aparece a primeira conexão importante. J03 alcança J01, que foi descoberto antes. Por isso, o low de J03 cai de dois para zero. Esse triângulo tem uma rota alternativa.
+
+[AÇÃO: AVANÇAR ATÉ J04 E J05, DEPOIS ATÉ A ARESTA DE RETORNO J05 → J03.]
+
+A busca continua para J04 e J05. J05 consegue voltar a J03, então seu low cai para dois. Ao retornar, J04 também recebe o valor dois.
+
+[AÇÃO: AVANÇAR ATÉ O RETORNO DE J04 PARA J03; DEIXAR O RESULTADO VISÍVEL.]
+
+Agora vem o ponto decisivo: o low de J04 é dois, e J03 foi descoberto no tempo dois. Dois é maior ou igual a dois. A condição é verdadeira.
+
+Isso significa que J04 e J05 não têm um caminho para J01 ou J02 que evite J03. Portanto, J03 é um ponto de articulação.
+
+[PAUSA]
+
+Reparem na tabela ao lado: os valores de descoberta e low mudam a cada passo. Ela mostra o que o algoritmo está guardando na memória enquanto percorre o grafo.
+
+[AVANÇAR]
+
+
+SLIDE 6 — TESTE DE MESA
+
+Este slide registra a mesma execução como teste de mesa. A tabela mostra a sequência de visitas, arestas de retorno e voltas da recursão.
+
+[APONTAR PARA A LINHA DESTACADA, PASSO 9]
+
+O passo mais importante é o nove. Quando a DFS volta de J04 para J03, compara low de J04, que vale dois, com a descoberta de J03, que também vale dois.
+
+A condição é verdadeira porque o grupo formado por J04 e J05 consegue voltar até J03, mas não até um ancestral de J03. Se J03 sair, esse grupo fica separado dos demais.
+
+Também entregamos a planilha completa do teste de mesa, com uma aba para o grafo original e outra para o grafo depois da conexão adicional que vamos mostrar mais adiante.
+
+[AVANÇAR]
+
+
+SLIDE 7 — O CLUBE DE JIU-JITSU
+
+Agora vamos traduzir o cálculo para a situação da academia.
+
+Temos cinco membros, de J01 a J05. Ligamos dois membros por uma aresta quando eles treinaram juntos pelo menos três vezes no mês. Esse limite faz parte da modelagem do nosso exemplo.
+
+[APONTAR PARA OS DOIS TRIÂNGULOS]
+
+J01, J02 e J03 formam um grupo. J03, J04 e J05 formam outro. São dois triângulos, mas eles compartilham somente J03.
+
+É por isso que ter várias conexões dentro de cada grupo não resolve, por si só, a dependência entre eles. O elo entre as duas partes ainda é uma pessoa só.
+
+[AVANÇAR]
+
+
+SLIDE 8 — DO TATAME AO GRAFO / PASSAGEM
+
+[APONTAR PARA A IMAGEM]
+
+Esta imagem ajuda a visualizar a ideia: cada praticante vira um ponto da rede, e os treinos em comum viram conexões.
+
+No nosso exemplo, J01 e J02 treinam pela manhã; J04 e J05, à noite. J03 participa dos dois turnos e acaba fazendo a ligação entre as turmas.
+
+Se ele faltar, o que acontece com essa rede? E qual conexão poderia eliminar essa dependência?
+
+[OLHAR PARA JOSÉ CARLOS; PAUSA]
+
+O José Carlos vai mostrar agora o diagnóstico, a simulação dessa ausência e a solução que encontramos.

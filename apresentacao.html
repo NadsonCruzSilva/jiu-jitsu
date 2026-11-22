@@ -837,6 +837,24 @@
     letter-spacing: 0.05em;
   }
 
+  .tm-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+  .tm-table-side, .tm-side { display: flex; flex-direction: column; gap: 16px; }
+  .tm-layout .tm-table { font-size: calc(16px * var(--font-scale)); }
+  .tm-layout th { font-size: calc(14px * var(--font-scale)); }
+  .tm-layout td { padding: 9px 7px; }
+  .tm-layout :is(th, td):nth-child(2),
+  .tm-layout :is(th, td):last-child { text-align: left; }
+  .tm-graph { border: 1.5px solid var(--ink); padding: 18px 22px; }
+  .tm-graph-box { min-height: 0; }
+  .tm-graph-box svg.graph { height: 324px; }
+  .tm-graph-box .g-node.articulation circle { fill: #b71c1c; stroke: #b71c1c; }
+  .tm-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 20px; }
+  .tm-legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .tm-legend span::before { content: ""; width: 26px; border-top: 2px solid currentColor; }
+  .tm-legend span:last-child::before { border-top-style: dashed; }
+  .tm-sheet { font-size: calc(15px * var(--font-scale)); }
+  .tm-sheet a { color: inherit; text-underline-offset: 3px; }
+
   /* ============================================================
      SLIDE 2 — EXEMPLO ANIMADO DE GRAFO BICONEXO
      ============================================================ */
@@ -1284,8 +1302,8 @@
           </div>
           <div class="lab">§ 06<span class="speaker">Nadson da Cruz Silva</span></div>
         </div>
-        <div class="cols wide-left" style="flex:1; align-items:start; gap:40px;">
-          <div class="col reveal d2" style="display:flex; flex-direction:column; gap:12px;">
+        <div class="tm-layout">
+          <div class="tm-table-side reveal d2">
             <div class="tm-table-wrap">
               <table class="tm-table">
                 <thead>
@@ -1324,25 +1342,18 @@
                 </tbody>
               </table>
             </div>
+            <p class="tm-sheet"><a href="teste_de_mesa_biconexo.xlsx">Planilha do teste de mesa</a> · Grafo Original (13 passos) e Grafo Biconexo (15 passos)</p>
           </div>
-          <div class="col reveal d3" style="display:flex; flex-direction:column; gap:20px;">
+          <div class="tm-side reveal d3">
+            <figure class="tm-graph">
+              <figcaption class="kicker">Grafo original</figcaption>
+              <div class="graph-box tm-graph-box" id="graphTableTest"></div>
+              <p class="tm-legend"><span>Aresta de árvore</span><span>Aresta de retorno</span></p>
+            </figure>
             <div class="card" style="border-left-width:5px;">
-              <div class="kicker" style="margin-bottom:6px;">O momento crucial (Passo 9)</div>
-              <h4 style="font-size:calc(20px * var(--font-scale)); margin-bottom:10px;">Por que J03 é articulação?</h4>
-              <p style="font-size:calc(17px * var(--font-scale)); line-height:1.5;">
-                Ao voltar do filho <strong>J04</strong> para <strong>J03</strong>, o algoritmo compara:
-                <br><br>
-                <code class="mono" style="font-size:calc(20px * var(--font-scale)); font-weight:700; color:var(--ink);">low[J04] (2) ≥ desc[J03] (2)</code>
-                <br><br>
-                Como a condição é verdadeira, o subgrafo <span class="mono">{J04, J05}</span> <strong>não tem aresta de volta</strong> para os ancestrais de J03 (J01 ou J02). J03 é, portanto, o único gargalo.
-              </p>
-            </div>
-            <div class="card" style="background:var(--paper-2);">
-              <div class="kicker" style="margin-bottom:6px;">Planilha Excel Entregue</div>
-              <h4 style="font-size:calc(18px * var(--font-scale));">teste_de_mesa_biconexo.xlsx</h4>
-              <p style="font-size:calc(15px * var(--font-scale)); line-height:1.45; margin-top:6px;">
-                Planilha oficial elaborada com as abas <strong>Grafo Original</strong> (13 passos) e <strong>Grafo Biconexo</strong> (15 passos), seguindo a estrutura padrão das salas virtuais de TPA.
-              </p>
+              <h4>Passo 9 · J03 é articulação</h4>
+              <p><strong class="mono">low[J04] (2) ≥ desc[J03] (2)</strong></p>
+              <p>Ao retornar de J04, a DFS confirma que J04 e J05 só se conectam a J01 e J02 por J03.</p>
             </div>
           </div>
         </div>
@@ -2239,6 +2250,16 @@ biconexo = <span class="c-key">True</span>
      5. GRÁFICOS ESTÁTICOS
      ========================================================= */
   buildGraph(document.getElementById("graphContext"), { edges: EDGES_ORIG });
+  {
+    const g = buildGraph(document.getElementById("graphTableTest"));
+    g.svg.setAttribute("viewBox", "92 88 616 480");
+    g.svg.setAttribute("role", "img");
+    g.svg.setAttribute("aria-label", "Grafo original: J01, J02 e J03 formam um triângulo, e J03, J04 e J05 formam outro. J03 é o ponto de articulação.");
+    setNodeState(g.nodeEls.J03, "articulation");
+    const treeEdges = new Set(STEPS.filter(s => s.acao === "Visitar" && s.pai !== "-")
+      .map(s => edgeKey(s.pai, s.vertice)));
+    Object.entries(g.edgeEls).forEach(([key, edge]) => setEdgeClass(edge, treeEdges.has(key) ? "tree" : "ret"));
+  }
   {
     const g = buildGraph(document.getElementById("graphArticulation"), { edges: EDGES_ORIG });
     setNodeState(g.nodeEls.J03, "articulation");
