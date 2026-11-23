@@ -1251,56 +1251,16 @@
     </section>
 
     <!-- ============================================================
-         SLIDE 5 — ANIMAÇÃO DFS
+         SLIDE 5 — TESTE DE MESA FORMAL
          ============================================================ -->
     <section class="slide hairlines" data-slide="4">
-      <div class="frame" style="bottom:88px;">
-        <div class="topbar reveal">
-          <div>
-            <div class="kicker" style="margin-bottom:12px;">Passo a passo</div>
-            <h2 style="font-size:calc(64px * var(--font-scale));">A DFS <em>em ação</em></h2>
-          </div>
-          <div class="lab">§ 05<span class="speaker">Nadson da Cruz Silva</span></div>
-        </div>
-        <div class="anim-layout reveal d2" style="flex:1; min-height:0;">
-          <div class="anim-stage">
-            <div class="graph-box" id="animGraph"></div>
-          </div>
-          <div class="anim-side">
-            <div class="step-card">
-              <div class="step-head">
-                <span class="step-count" id="stepCount">Passo 0 / 13</span>
-                <span class="step-acao" id="stepAcao">Pronto</span>
-              </div>
-              <div class="step-body" id="stepBody">
-                Clique em <strong>Próximo →</strong> para iniciar a busca em profundidade a partir da raiz <span class="mono">J01</span>.
-              </div>
-              <div class="step-note" id="stepNote"></div>
-            </div>
-            <div class="val-table" id="valTable"></div>
-            <div class="controls">
-              <button class="btn" id="btnPrev" disabled>← Anterior</button>
-              <button class="btn primary" id="btnNext">Próximo →</button>
-              <button class="btn" id="btnReset">↺ Reset</button>
-              <button class="btn" id="btnAuto">▶ Auto</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="pagenum">05 / 14</div>
-    </section>
-
-    <!-- ============================================================
-         SLIDE 6 — TESTE DE MESA FORMAL
-         ============================================================ -->
-    <section class="slide hairlines" data-slide="5">
       <div class="frame" style="bottom:82px;">
         <div class="topbar reveal">
           <div>
             <div class="kicker" style="margin-bottom:12px;">Rastreamento de variáveis · Exigência do trabalho</div>
             <h2 style="font-size:calc(60px * var(--font-scale));">O teste de mesa <em>formal</em></h2>
           </div>
-          <div class="lab">§ 06<span class="speaker">Nadson da Cruz Silva</span></div>
+          <div class="lab">§ 05<span class="speaker">Nadson da Cruz Silva</span></div>
         </div>
         <div class="tm-layout">
           <div class="tm-table-side reveal d2">
@@ -1354,6 +1314,46 @@
               <h4>Passo 9 · J03 é articulação</h4>
               <p><strong class="mono">low[J04] (2) ≥ desc[J03] (2)</strong></p>
               <p>Ao retornar de J04, a DFS confirma que J04 e J05 só se conectam a J01 e J02 por J03.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pagenum">05 / 14</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 6 — ANIMAÇÃO DFS
+         ============================================================ -->
+    <section class="slide hairlines" data-slide="5">
+      <div class="frame" style="bottom:88px;">
+        <div class="topbar reveal">
+          <div>
+            <div class="kicker" style="margin-bottom:12px;">Passo a passo</div>
+            <h2 style="font-size:calc(64px * var(--font-scale));">A DFS <em>em ação</em></h2>
+          </div>
+          <div class="lab">§ 06<span class="speaker">Nadson da Cruz Silva</span></div>
+        </div>
+        <div class="anim-layout reveal d2" style="flex:1; min-height:0;">
+          <div class="anim-stage">
+            <div class="graph-box" id="animGraph"></div>
+          </div>
+          <div class="anim-side">
+            <div class="step-card">
+              <div class="step-head">
+                <span class="step-count" id="stepCount">Passo 0 / 13</span>
+                <span class="step-acao" id="stepAcao">Pronto</span>
+              </div>
+              <div class="step-body" id="stepBody">
+                Clique em <strong>Próximo →</strong> para iniciar a busca em profundidade a partir da raiz <span class="mono">J01</span>.
+              </div>
+              <div class="step-note" id="stepNote"></div>
+            </div>
+            <div class="val-table" id="valTable"></div>
+            <div class="controls">
+              <button class="btn" id="btnPrev" disabled>← Anterior</button>
+              <button class="btn primary" id="btnNext">Próximo →</button>
+              <button class="btn" id="btnReset">↺ Reset</button>
+              <button class="btn" id="btnAuto">▶ Auto</button>
             </div>
           </div>
         </div>
