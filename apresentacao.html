@@ -392,7 +392,7 @@
       var(--ifes-lime) 60% 80%,
       var(--ifes-green) 80% 100%);
   }
-  .slide:not([data-slide="0"]):not([data-slide="13"])::after {
+  .slide:not([data-slide="0"]):not([data-slide="13"]):not([data-slide="14"])::after {
     width: 168px;
     right: auto;
     height: 9px;
@@ -546,6 +546,34 @@
   .slide[data-slide="0"] .frame > div:last-child { border-top-color: rgba(35, 148, 56, .28) !important; }
   .slide[data-slide="13"] .frame { left: 160px !important; right: 160px; }
   .slide[data-slide="13"] h2 { font-size: calc(82px * var(--font-scale)) !important; max-width: 1380px; }
+  .slide[data-slide="14"] .frame {
+    inset: 118px 160px 112px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .slide[data-slide="14"] .thanks-title {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 120px;
+    width: 100%;
+    font-family: var(--font-display);
+    font-size: calc(116px * var(--font-scale));
+    font-weight: 800;
+    line-height: .96;
+    letter-spacing: -.045em;
+    color: var(--ifes-green-dark);
+  }
+  .slide[data-slide="14"] .thanks-title em {
+    color: var(--ifes-red);
+    font-style: italic;
+  }
+  .slide[data-slide="14"] .thanks-rule {
+    width: min(980px, 72vw);
+    margin-top: 44px;
+    border-top: 1.5px solid rgba(35, 148, 56, .32);
+  }
 
   .hud { padding: 10px 22px 14px; }
   .brand, .page-indicator { color: var(--ifes-green-dark); }
@@ -1071,7 +1099,7 @@
           <div><div class="kicker" style="margin-bottom:8px;">Solução</div><div style="font-family:var(--font-display);font-size:calc(30px * var(--font-scale));">+ aresta J02–J04</div></div>
         </div>
       </div>
-      <div class="pagenum">01 / 14</div>
+      <div class="pagenum">01 / 15</div>
     </section>
 
     <!-- ============================================================
@@ -1137,7 +1165,7 @@
           </div>
         </div>
       </div>
-      <div class="pagenum">02 / 14</div>
+      <div class="pagenum">02 / 15</div>
     </section>
 
     <!-- ============================================================
@@ -1184,7 +1212,7 @@
           </div>
         </div>
       </div>
-      <div class="pagenum">03 / 14</div>
+      <div class="pagenum">03 / 15</div>
     </section>
 
     <!-- ============================================================
@@ -1247,7 +1275,7 @@
           </div>
         </div>
       </div>
-      <div class="pagenum">04 / 14</div>
+      <div class="pagenum">04 / 15</div>
     </section>
 
     <!-- ============================================================
@@ -1318,7 +1346,7 @@
           </div>
         </div>
       </div>
-      <div class="pagenum">05 / 14</div>
+      <div class="pagenum">05 / 15</div>
     </section>
 
     <!-- ============================================================
@@ -1358,7 +1386,7 @@
           </div>
         </div>
       </div>
-      <div class="pagenum">06 / 14</div>
+      <div class="pagenum">06 / 15</div>
     </section>
 
     <!-- ============================================================
@@ -1390,7 +1418,7 @@
           <div class="col graph-box reveal d3" id="graphContext"></div>
         </div>
       </div>
-      <div class="pagenum">07 / 14</div>
+      <div class="pagenum">07 / 15</div>
     </section>
 
     <!-- ============================================================
@@ -1433,7 +1461,7 @@
           </div>
         </div>
       </div>
-      <div class="pagenum">08 / 14</div>
+      <div class="pagenum">08 / 15</div>
     </section>
 
     <!-- ============================================================
@@ -1467,7 +1495,7 @@ biconexo = <span class="c-key">False</span>
           </div>
         </div>
       </div>
-      <div class="pagenum">09 / 14</div>
+      <div class="pagenum">09 / 15</div>
     </section>
 
     <!-- ============================================================
@@ -1499,7 +1527,7 @@ biconexo = <span class="c-key">False</span>
           <div class="col graph-box reveal d3" id="graphRemoval"></div>
         </div>
       </div>
-      <div class="pagenum">10 / 14</div>
+      <div class="pagenum">10 / 15</div>
     </section>
 
     <!-- ============================================================
@@ -1534,7 +1562,7 @@ biconexo = <span class="c-key">True</span>
           </div>
         </div>
       </div>
-      <div class="pagenum">11 / 14</div>
+      <div class="pagenum">11 / 15</div>
     </section>
 
     <!-- ============================================================
@@ -1602,7 +1630,7 @@ biconexo = <span class="c-key">True</span>
           </table>
         </div>
       </div>
-      <div class="pagenum">12 / 14</div>
+      <div class="pagenum">12 / 15</div>
     </section>
 
     <!-- ============================================================
@@ -1652,7 +1680,7 @@ biconexo = <span class="c-key">True</span>
           </div>
         </div>
       </div>
-      <div class="pagenum">13 / 14</div>
+      <div class="pagenum">13 / 15</div>
     </section>
 
     <!-- ============================================================
@@ -1701,7 +1729,34 @@ biconexo = <span class="c-key">True</span>
           </div>
         </div>
       </div>
-      <div class="pagenum">14 / 14</div>
+      <div class="pagenum">14 / 15</div>
+    </section>
+
+    <!-- ============================================================
+         SLIDE 15 — AGRADECIMENTO
+         ============================================================ -->
+    <section class="slide hairlines" data-slide="14">
+      <div class="glitch left">
+        <svg width="100%" height="100%" viewBox="0 0 300 1000" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <pattern id="scan3" width="10" height="10" patternUnits="userSpaceOnUse">
+              <rect width="10" height="10" fill="#F0EBDE"/>
+              <rect x="0" width="3" height="10" fill="#1F2BE0"/>
+            </pattern>
+          </defs>
+          <rect x="0" y="0" width="70" height="1000" fill="url(#scan3)"/>
+          <rect x="0" y="200" width="120" height="160" fill="url(#scan3)"/>
+          <rect x="0" y="520" width="170" height="120" fill="url(#scan3)"/>
+          <rect x="0" y="780" width="115" height="180" fill="url(#scan3)"/>
+        </svg>
+      </div>
+      <div class="frame">
+        <div class="kicker reveal">Encerramento</div>
+        <div class="lab reveal" style="margin-top:14px;">§ 15<span class="speaker">José Carlos Ceccon &amp; Nadson da Cruz Silva</span></div>
+        <h2 class="thanks-title reveal d1"><span>Obrigado</span><em>Dúvidas?</em></h2>
+        <div class="thanks-rule reveal d2"></div>
+      </div>
+      <div class="pagenum">15 / 15</div>
     </section>
 
   </main>
@@ -1717,7 +1772,7 @@ biconexo = <span class="c-key">True</span>
     <button class="font-btn" id="fontDown" aria-label="Diminuir fonte" title="Diminuir fonte">A⁻</button>
     <span class="font-label" id="fontLabel">100%</span>
     <button class="font-btn" id="fontUp" aria-label="Aumentar fonte" title="Aumentar fonte">A⁺</button>
-    <span class="page-indicator" id="pageIndicator">01 / 14</span>
+    <span class="page-indicator" id="pageIndicator">01 / 15</span>
     <button class="nav-btn" id="navPrev" aria-label="Anterior">‹</button>
     <button class="nav-btn" id="navNext" aria-label="Próximo">›</button>
   </div>
